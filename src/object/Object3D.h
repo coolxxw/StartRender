@@ -7,6 +7,8 @@
 
 #include <vector>
 #include <string>
+#include <memory>
+
 #include "../math/Vector.h"
 #include "ObjectFile.h"
 
@@ -18,30 +20,27 @@ public:
         int b;
         int c;
     };
-    struct Vertex{
-        float x;
-        float y;
-        float z;
-        Vector3f normalVector;//法向量
-
-        Vector3f toVector3f() const{
-            return ::Vector3f(x,y,z);
-        }
-    };
-
 
     int vertexLength;
     int faceLength;
-    Vertex *vertex;//顶点
+    Vector4f *vertex;//顶点
+    Vector4f* viewVertex;
     Face *face;//面
-    Vector3f center;
-    float objectSize;
+    Vector3f *normalVector;
+    Vector3f center{};
+    float objectSize{};
 
     Object3D();
 
-    Object3D (ObjectFile* obj);
+    explicit Object3D (ObjectFile* obj);
+
 
     ~Object3D();
+
+private:
+
+    Object3D(const Object3D&):Object3D(){}//禁止复制
+    Object3D& operator=(const Object3D&)=default;//
 
 };
 

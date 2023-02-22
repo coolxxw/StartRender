@@ -7,11 +7,9 @@
 
 
 
-ObjectFile::ObjectFile() {
+ObjectFile::ObjectFile() = default;
 
-}
-
-ObjectFile ObjectFile::LoadFromObjFile(std::string filename) {
+ObjectFile ObjectFile::LoadFromObjFile(const std::string& filename) {
     ObjectFile obj;
     std::ifstream file;
     file.open(filename,std::ios::in);
@@ -30,7 +28,7 @@ ObjectFile ObjectFile::LoadFromObjFile(std::string filename) {
             //顶点
             float a,b,c;
             ss>>a>>b>>c;
-            obj.vertex.push_back(Vector3f{a,b,c});
+            obj.vertex.emplace_back(a,b,c);
 
         }else if(lineHead=="f"){
             //边
@@ -64,7 +62,7 @@ ObjectFile ObjectFile::LoadFromObjFile(std::string filename) {
     if(check){
         return obj;
     }
-    return ObjectFile();
+    return {};
 }
 
 void ObjectFile::destroy() {

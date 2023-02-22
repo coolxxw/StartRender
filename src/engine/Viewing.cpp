@@ -4,7 +4,9 @@
 #include <cmath>
 #include "Viewing.h"
 
-Viewing::Viewing(const Camera &camera, ClipSpace clipSpace,int width,int height) {
+using namespace RenderCore;
+
+Viewing::Viewing(const Camera &camera, ClipSpace clipSpace, int width, int height) {
     Vector3f w=-(camera.g);
     Vector3f v=camera.t;
     Vector3f u=v.cross(w);

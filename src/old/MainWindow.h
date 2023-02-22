@@ -5,15 +5,15 @@
 #ifndef STARTRENDER_MAINWINDOW_H
 #define STARTRENDER_MAINWINDOW_H
 
-#include "engine/Render.h"
+#include "../include/Render.h"
 
 
 class MainWindowPrivate;
 
-class MainWindow :public RenderPaintInterface{
+class MainWindow :public Render::RenderPaintInterface{
 protected:
     MainWindowPrivate *d{};
-    Render* render;
+    Render::StartRender* render;
     friend MainWindowPrivate;
     bool mouseMoveWithLButtonFlag=false;
     int mousePosX;
@@ -26,7 +26,7 @@ public:
     void show();
     void exec();
 
-    void paint(void* frameBuffer)override;
+    void paint(void *frameBuffer, int width, int height) override;
 
 protected:
     void keyboardHandle(int key);

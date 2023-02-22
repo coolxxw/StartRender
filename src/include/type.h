@@ -5,8 +5,16 @@
 #ifndef STARTRENDER_TYPE_H
 #define STARTRENDER_TYPE_H
 
+#include "../platform/def.h"
+
 #ifndef byte
 typedef unsigned char byte;
+#endif
+
+#ifdef USE_DECIMAL_FLOAT64
+typedef double decimal;
+#else
+typedef float decimal;
 #endif
 
 

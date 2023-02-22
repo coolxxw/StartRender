@@ -2,9 +2,9 @@
 // Created by xxw on 2022/11/10.
 //
 
-#include <windows.h>
+#include <Windows.h>
 #include "MainWindow.h"
-#include "engine/Render.h"
+#include "../include/Render.h"
 
 
 class MainWindowPrivate{
@@ -191,7 +191,8 @@ MainWindow::MainWindow() {
 }
 
 MainWindow::~MainWindow() {
-
+    delete render;
+    delete this->d;
 }
 
 void MainWindow::show() {
@@ -212,9 +213,6 @@ void MainWindow::exec() {
     }
 }
 
-void MainWindow::paint(void *frameBuffer) {
-    d->updateBitmap(frameBuffer);
-}
 
 void MainWindow::keyboardHandle(int key) {
     switch (key) {
@@ -261,6 +259,10 @@ void MainWindow::mouseMoveWithLButtonHandle(int x,int y) {
 
 void MainWindow::mouseWheelHandle(int x) {
     render->setCamera(render->getCamera().moveForward((double)x/10000));
+}
+
+void MainWindow::paint(void *frameBuffer, int width, int height) {
+    d->updateBitmap(frameBuffer);
 }
 
 

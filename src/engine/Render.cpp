@@ -2,30 +2,55 @@
 // Created by xxw on 2023/2/10.
 //
 
-#include "Render.h"
+#include "../include/Render.h"
+#include "RenderThread.h"
+#include "../platform/SIMDUtil.h"
 
-Render::Render(int width, int height) {
+using  Render::StartRender;
+using namespace RenderCore;
+
+StartRender::StartRender(int width, int height) {
     engine=new RenderThread();
-    engine->setScreenSize(width,height);
+    engine->contextUpdate->width=width;
+    engine->contextUpdate->height=height;
 }
 
-void Render::start() {
+StartRender::~StartRender() {
+    delete engine;
+}
+
+void StartRender::start() {
     engine->startRender();
 }
 
-void Render::stop() {
+void StartRender::stop() {
     engine->stopRender();
 }
 
-void Render::registerPaintImpl(RenderPaintInterface *paintImpl) {
+void StartRender::registerPaintImpl(RenderPaintInterface *paintImpl) {
     {engine->paintImpl=paintImpl;}
 }
 
-Camera Render::getCamera() {
-    return engine->getCamera();
+Render::Camera StartRender::getCamera() {
+    return Render::Camera(engine->contextUpdate);
 }
 
-void Render::setCamera(Camera camera) {
-    engine->setCamera(camera);
+
+void StartRender::setSize(int width, int height) {
+    engine->contextUpdate->width=width;
+    engine->contextUpdate->height=height;
 }
+
+long long Render::StartRender::getFrameCounter() {
+    return engine->getFrameCounter();
+}
+
+float Render::StartRender::getFps() {
+    return engine->getFps();
+}
+
+Render::LightParam& Render::StartRender::getLightParam() {
+    return engine->contextUpdate->light;
+}
+
 

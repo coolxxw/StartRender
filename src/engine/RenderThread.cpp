@@ -6,8 +6,10 @@
 #include <iostream>
 
 #include "RenderThread.h"
-#include "../event/EventManager.h"
+#include "RenderFrame.h"
+#include "EventManager.h"
 
+using namespace RenderCore;
 
 RenderThread::RenderThread() {
     frameBufferLock= false;
@@ -17,16 +19,19 @@ RenderThread::RenderThread() {
     threadExitFlag=false;
     paintImpl= nullptr;
     context = new Context();
+    contextUpdate=new ContextUpdate();
     renderFrame = new RenderFrame(context);
-    eventManager=new EventManager(context);
+    //eventManager=new EventManager(context);
 }
 
 RenderThread::~RenderThread() {
     while (thread){
         threadExitFlag= true;
     }
-    delete eventManager;
+    delete renderFrame;
+    //delete eventManager;
     delete context;
+    delete contextUpdate;
 }
 
 void RenderThread::setMaxFPS(int fps) {
@@ -52,14 +57,7 @@ void RenderThread::stopRender() {
     threadExitFlag=true;
 }
 
-void RenderThread::setScreenSize(int width, int height) {
-    if(frameBufferLock){
-        eventManager->postEvent(new ResizeEvent(width,height));
-        return;
-    }else{
-        context->setSize(width, height);
-    }
-}
+
 
 int RenderThread::renderThread() {
     int renderTime=0;
@@ -68,8 +66,8 @@ int RenderThread::renderThread() {
     while(!threadExitFlag){
 
         //处理事件
-        context->camera=context->tempCamera;
-        eventManager->disposalAllEvent();
+        context->update(*contextUpdate);
+       // eventManager->disposalAllEvent();
 
         //限制帧率
         int t=std::clock();
@@ -80,21 +78,24 @@ int RenderThread::renderThread() {
         renderTime=t;
 
         //帧统计时间
-        int fpsInv=2*CLOCKS_PER_SEC;
+        int fpsInv=1*CLOCKS_PER_SEC;
         if((t-frameTimeStart)>=(fpsInv)){
-            float fps=(float)(frameCounter-frameStart)/(t-frameTimeStart)*CLOCKS_PER_SEC;
-            std::cout<<fps<<" FPS total:"<<frameCounter<<std::endl;
+            fps=(float)(frameCounter-frameStart)/(t-frameTimeStart)*CLOCKS_PER_SEC;
+            //std::cout<<fps<<" FPS total:"<<frameCounter<<std::endl;
             frameTimeStart=t;
             frameStart=frameCounter;
         }
 
+        if(context->width*context->height<=0){
+            continue;
+        }
 
         //开始渲染
         frameBufferLock= true;
         renderFrame->render();
         frameCounter++;
         if(paintImpl){
-            paintImpl->paint(context->frameBuffer);
+            paintImpl->paint(context->frameBuffer,context->width,context->height);
         }
         //结束渲染
         frameBufferLock=false;
@@ -104,14 +105,15 @@ int RenderThread::renderThread() {
     return 0;
 }
 
-
-void RenderThread::setCamera(Camera camera) {
-    context->tempCamera=camera;
+float RenderCore::RenderThread::getFps() {
+    return fps;
 }
 
-Camera RenderThread::getCamera() {
-    return context->tempCamera;
+long long RenderCore::RenderThread::getFrameCounter() {
+    return frameCounter;
 }
+
+
 
 
 

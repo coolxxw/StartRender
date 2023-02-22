@@ -22,7 +22,7 @@ public:
 
     ObjectFile();
 
-    static ObjectFile LoadFromObjFile(std::string filename);
+    static ObjectFile LoadFromObjFile(const std::string& filename);
 
     void destroy();
 

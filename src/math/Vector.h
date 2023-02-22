@@ -7,20 +7,20 @@
 
 #include <cmath>
 
+#include "../platform/def.h"
+#include "../include/type.h"
+
 class Vector2f{
 public:
-    float x;
-    float y;
+    decimal x;
+    decimal y;
 
     Vector2f():x(0),y(0){}
 
-    Vector2f(float x,float y):x(x),y(y){}
+    Vector2f(decimal x,decimal y):x(x),y(y){}
 
-    void set(float x,float y){
-        this->x=x; this->y=y;
-    }
 
-    Vector2f operator+(const Vector2f& v){
+    Vector2f operator+(const Vector2f& v) const{
         Vector2f vector;
         vector.x=this->x+v.x;
         vector.y=this->y+v.y;
@@ -41,12 +41,12 @@ public:
     }
 
     /*点乘*/
-    float operator*(const Vector2f& v){
+    decimal operator*(const Vector2f& v) const{
         return x*v.x+y*v.y;
     }
 
     /*差积*/
-    float cross(const Vector2f& v){
+    decimal cross(const Vector2f& v) const{
         return x*v.y-v.x*y;
     }
 
@@ -55,24 +55,20 @@ public:
 
 class Vector3f {
 public:
-    float x;
-    float y;
-    float z;
+    decimal x;
+    decimal y;
+    decimal z;
 
 public:
 
-    Vector3f(const Vector2f v,float z):x(v.x),y(v.y),z(z){}
-    Vector3f(float x=0,float y=0,float z=0):x(x),y(y),z(z){}
+    Vector3f(const Vector2f v,decimal z):x(v.x),y(v.y),z(z){}
+    explicit Vector3f(decimal x=0,decimal y=0,decimal z=0):x(x),y(y),z(z){}
 
-    void set(float x,float y,float z){
-        this->x=x; this->y=y; this->z=z;
+    operator Vector2f() const{
+        return {x,y};
     }
 
-    operator Vector2f(){
-        return Vector2f(x,y);
-    }
-
-    Vector3f operator+(const Vector3f& v){
+    Vector3f operator+(const Vector3f& v) const{
         Vector3f vector;
         vector.x=this->x+v.x;
         vector.y=this->y+v.y;
@@ -93,15 +89,15 @@ public:
     }
 
     /*点乘*/
-    Vector3f operator*(float k){
+    Vector3f operator*(decimal k) const{
         return Vector3f(k*x,k*y,k*z);
     }
-    float operator*(const Vector3f& v){
+    decimal operator*(const Vector3f& v) const{
         return x*v.x+y*v.y+z*v.z;
     }
 
     /*差积*/
-    Vector3f cross(const Vector3f& v){
+    Vector3f cross(const Vector3f& v) const{
         Vector3f vec;
         vec.x=y*v.z-v.y*z;
         vec.y=z*v.x-x*v.z;
@@ -110,7 +106,7 @@ public:
     }
 
     void normalization(){
-        float l=sqrt(x*x+y*y+z*z);
+        decimal l=sqrt(x*x+y*y+z*z);
         x/=l;
         y/=l;
         z/=l;
@@ -121,19 +117,15 @@ public:
 
 class Vector4f {
 public:
-    float x;
-    float y;
-    float z;
-    float w;
+    decimal x;
+    decimal y;
+    decimal z;
+    decimal w;
 
 public:
-    Vector4f(float x=0,float y=0,float z=0,float w=1):x(x),y(y),z(z),w(w){}
+    explicit Vector4f(decimal x=0,decimal y=0,decimal z=0,decimal w=1):x(x),y(y),z(z),w(w){}
 
-    void set(float x,float y,float z,float w=1){
-        this->x=x; this->y=y; this->z=z; this->w=w;
-    }
-
-    Vector4f operator+(const Vector4f& v){
+    Vector4f operator+(const Vector4f& v) const{
         Vector4f vector;
         vector.x=this->x+v.x;
         vector.y=this->x+v.y;
@@ -142,7 +134,7 @@ public:
         return vector;
     }
 
-    Vector4f operator-(const Vector4f& v){
+    Vector4f operator-(const Vector4f& v) const{
         Vector4f vector;
         vector.x=this->x-v.x;
         vector.y=this->x-v.y;
@@ -152,13 +144,18 @@ public:
     }
 
     /*点乘*/
-    float operator*(const Vector4f& v){
+    decimal operator*(const Vector4f& v) const{
         return x*v.x+y*v.y+z*v.z+w*v.w;
+    }
+
+    /*点乘*/
+    Vector4f operator*(double k) const{
+        return Vector4f(x*k,y*k,z*k,w*k);
     }
 
 
 
-    Vector3f vec3(){
+    Vector3f vec3() const{
         return Vector3f{x,y,z};
     }
 
@@ -166,5 +163,4 @@ public:
 
 
 
-
-#endif //SIMPLE3D_VECTOR_H
+#endif //STARTRENDER_VECTOR_H
