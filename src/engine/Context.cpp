@@ -14,7 +14,7 @@ Context::Context() {
     file.close();
     //ObjectFile file=ObjectFile::LoadFromObjFile("jball.ob");
     //auto* obj=new Object3D(&file);
-    if(obj->faceLength){
+    if(obj&&obj->faceLength){
         object.push_back(obj);
     }
     width=0;
@@ -46,9 +46,9 @@ void Context::update(ContextUpdate &contextUpdate) {
         delete frameBuffer;
         delete triangularComponentBuffer;
 
-        zBuffer=new decimal [width*height];
-        frameBuffer=new ARGB[width*height];
-        triangularComponentBuffer=new decimal[width*height*4];
+        zBuffer=new float [width*height];
+        frameBuffer=new RGBA[width * height];
+        triangularComponentBuffer=new float[width*height*4];
     }
     //相机
     camera=contextUpdate.camera;

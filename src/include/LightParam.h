@@ -12,16 +12,16 @@ namespace Render {
     //光照参数
     struct LightParam{
         Vector3f directionalLight;//平行光方向
-        RGBA ambient;//环境光
-        RGBA diffuse;//漫反射
-        RGBA specular;//镜面光
+        RGBAF ambient;//环境光
+        RGBAF diffuse;//漫反射
+        RGBAF specular;//镜面光
         int specularExponent;//镜面光指数
 
         LightParam(){
             directionalLight=Vector3f(-1,0,0);
-            ambient=RGBA(255,255,255,0.5);
-            diffuse=RGBA(255,255,255,0.5);
-            specular=RGBA(255,255,255,0.3);
+            ambient=RGBAF(1.0, 1.0, 1.0, 0.5);
+            diffuse=RGBAF(1.0, 1.0, 1.0, 0.5);
+            specular=RGBAF(1.0, 1.0, 1.0, 0.3);
             specularExponent=64;
         }
     };

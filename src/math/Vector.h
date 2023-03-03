@@ -12,12 +12,12 @@
 
 class Vector2f{
 public:
-    decimal x;
-    decimal y;
+    float x;
+    float y;
 
     Vector2f():x(0),y(0){}
 
-    Vector2f(decimal x,decimal y):x(x),y(y){}
+    Vector2f(float x,float y):x(x),y(y){}
 
 
     Vector2f operator+(const Vector2f& v) const{
@@ -41,12 +41,22 @@ public:
     }
 
     /*点乘*/
-    decimal operator*(const Vector2f& v) const{
+    float operator*(const Vector2f& v) const{
         return x*v.x+y*v.y;
     }
 
+    /*点乘*/
+    Vector2f operator*(float k) const{
+        return Vector2f(x*k,y*k);
+    }
+
+    /*点乘*/
+    Vector2f operator*(double k) const{
+        return Vector2f(x*k,y*k);
+    }
+
     /*差积*/
-    decimal cross(const Vector2f& v) const{
+    float cross(const Vector2f& v) const{
         return x*v.y-v.x*y;
     }
 
@@ -55,16 +65,16 @@ public:
 
 class Vector3f {
 public:
-    decimal x;
-    decimal y;
-    decimal z;
+    float x;
+    float y;
+    float z;
 
 public:
 
-    Vector3f(const Vector2f v,decimal z):x(v.x),y(v.y),z(z){}
-    explicit Vector3f(decimal x=0,decimal y=0,decimal z=0):x(x),y(y),z(z){}
+    Vector3f(const Vector2f v,float z):x(v.x),y(v.y),z(z){}
+    explicit Vector3f(float x=0,float y=0,float z=0):x(x),y(y),z(z){}
 
-    operator Vector2f() const{
+    Vector2f toVector2f() const{
         return {x,y};
     }
 
@@ -89,10 +99,10 @@ public:
     }
 
     /*点乘*/
-    Vector3f operator*(decimal k) const{
+    Vector3f operator*(float k) const{
         return Vector3f(k*x,k*y,k*z);
     }
-    decimal operator*(const Vector3f& v) const{
+    float operator*(const Vector3f& v) const{
         return x*v.x+y*v.y+z*v.z;
     }
 
@@ -106,7 +116,7 @@ public:
     }
 
     void normalization(){
-        decimal l=sqrt(x*x+y*y+z*z);
+        float l=sqrt(x*x+y*y+z*z);
         x/=l;
         y/=l;
         z/=l;
@@ -117,13 +127,13 @@ public:
 
 class Vector4f {
 public:
-    decimal x;
-    decimal y;
-    decimal z;
-    decimal w;
+    float x;
+    float y;
+    float z;
+    float w;
 
 public:
-    explicit Vector4f(decimal x=0,decimal y=0,decimal z=0,decimal w=1):x(x),y(y),z(z),w(w){}
+    explicit Vector4f(float x=0,float y=0,float z=0,float w=1):x(x),y(y),z(z),w(w){}
 
     Vector4f operator+(const Vector4f& v) const{
         Vector4f vector;
@@ -144,7 +154,7 @@ public:
     }
 
     /*点乘*/
-    decimal operator*(const Vector4f& v) const{
+    float operator*(const Vector4f& v) const{
         return x*v.x+y*v.y+z*v.z+w*v.w;
     }
 

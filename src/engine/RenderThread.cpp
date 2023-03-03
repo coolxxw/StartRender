@@ -3,15 +3,21 @@
 //
 #include <Windows.h>
 #include <ctime>
-#include <iostream>
+
+#include <lodepng_util.h>
 
 #include "RenderThread.h"
 #include "RenderFrame.h"
-#include "EventManager.h"
 
 using namespace RenderCore;
 
+bool RenderCore::RenderThread::isInit=true;
+
 RenderThread::RenderThread() {
+    if(!isInit){
+        SIMDUtil::getSimdSupportInfo();
+    }
+    isInit=true;
     frameBufferLock= false;
     maxFPS=60;
     frameCounter=0;
@@ -34,14 +40,14 @@ RenderThread::~RenderThread() {
     delete contextUpdate;
 }
 
-void RenderThread::setMaxFPS(int fps) {
-
+void RenderThread::setMaxFPS(float newFps) {
+    this->fps=newFps;
 }
 
 static DWORD WINAPI ThreadProc(
         _In_ LPVOID lpParameter
 ){
-    RenderThread* obj= (RenderThread*)lpParameter;
+    auto* obj= (RenderThread*)lpParameter;
     return obj->renderThread();
 }
 
@@ -50,7 +56,7 @@ void RenderThread::startRender() {
         return;
     }
     threadExitFlag=false;
-    thread=::CreateThread(0,0,ThreadProc,this,0,0);
+    thread=::CreateThread(nullptr,0,ThreadProc,this,0,0);
 }
 
 void RenderThread::stopRender() {
@@ -60,7 +66,6 @@ void RenderThread::stopRender() {
 
 
 int RenderThread::renderThread() {
-    int renderTime=0;
     int frameTimeStart=clock();
     long long frameStart=0;
     while(!threadExitFlag){
@@ -75,12 +80,11 @@ int RenderThread::renderThread() {
         //    ::Sleep(15);
         //    t=std::clock();
        // }
-        renderTime=t;
 
         //帧统计时间
         int fpsInv=1*CLOCKS_PER_SEC;
         if((t-frameTimeStart)>=(fpsInv)){
-            fps=(float)(frameCounter-frameStart)/(t-frameTimeStart)*CLOCKS_PER_SEC;
+            fps=(float)(frameCounter-frameStart)/(float)(t-frameTimeStart)*CLOCKS_PER_SEC;
             //std::cout<<fps<<" FPS total:"<<frameCounter<<std::endl;
             frameTimeStart=t;
             frameStart=frameCounter;
@@ -89,6 +93,8 @@ int RenderThread::renderThread() {
         if(context->width*context->height<=0){
             continue;
         }
+
+
 
         //开始渲染
         frameBufferLock= true;
@@ -105,11 +111,11 @@ int RenderThread::renderThread() {
     return 0;
 }
 
-float RenderCore::RenderThread::getFps() {
+float RenderCore::RenderThread::getFps() const {
     return fps;
 }
 
-long long RenderCore::RenderThread::getFrameCounter() {
+long long RenderCore::RenderThread::getFrameCounter() const {
     return frameCounter;
 }
 

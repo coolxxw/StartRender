@@ -11,36 +11,27 @@
 typedef unsigned char byte;
 #endif
 
-#ifdef USE_DECIMAL_FLOAT64
-typedef double decimal;
-#else
-typedef float decimal;
-#endif
 
-
-struct ARGB{
-    byte b;
-    byte g;
-    byte r;
-    byte a;
-
-    explicit ARGB(byte r=0,byte g=0,byte b=0,byte a=255):a(a),r(r),g(g),b(b){}
-
-};
 
 struct RGBA{
     byte r;
     byte g;
     byte b;
-    float a;
-    explicit RGBA(byte r=0,byte g=0,byte b=0,float a=1.0):a(a),r(r),g(g),b(b){
-        if(a>1.0){
-            a=1.0;
-        }else if(a<0){
-            a=0;
-        }
-    }
+    byte a;
+
+    explicit RGBA(byte r=0, byte g=0, byte b=0, byte a=255): a(a), r(r), g(g), b(b){}
+
 };
+
+struct RGBAF{
+    float r;
+    float g;
+    float b;
+    float a;
+
+    explicit RGBAF(float r=1.0, float g=1.0, float b=1.0, float a=1.0): r(r), g(g), b(b), a(a){}
+};
+
 
 
 #endif //STARTRENDER_TYPE_H

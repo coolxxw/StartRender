@@ -9,6 +9,7 @@
 using  Render::StartRender;
 using namespace RenderCore;
 
+
 StartRender::StartRender(int width, int height) {
     engine=new RenderThread();
     engine->contextUpdate->width=width;

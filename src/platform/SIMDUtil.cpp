@@ -3,7 +3,10 @@
 //
 
 #include <intrin.h>
+#include "def.h"
 #include "SIMDUtil.h"
+
+bool SIMDUtil::avx2=false;
 
 SIMDUtil::Support SIMDUtil::support;
 
@@ -43,6 +46,11 @@ SIMDUtil::Support SIMDUtil::getSimdSupportInfo() {
         support2.OS_AVX= true;
     if(XCR0_EAX & 0x00000040)
         support2.OS_AVX512= true;
+
+#ifdef ENABLE_SIMD_SUPPORT
+
+    avx2=support2.OS_AVX;
+#endif
 
     return support2;
 }

@@ -5,7 +5,7 @@
 #ifndef STARTRENDER_OBJECTOPERATOR_H
 #define STARTRENDER_OBJECTOPERATOR_H
 
-#include "Object3D.h"
+#include "../engine/Object3D.h"
 
 class ObjectOperator {
 private:

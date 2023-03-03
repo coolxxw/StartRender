@@ -5,7 +5,7 @@
 #ifndef STARTRENDER_UTIL_H
 #define STARTRENDER_UTIL_H
 
-#include "immintrin.h"
+
 
 #include "../math/Vector.h"
 #include "../platform/SIMDUtil.h"
@@ -33,14 +33,14 @@ public:
         bc.x=c.x-b.x;
         bc.y=c.y-b.y;
 
-        decimal p1=ap.cross(ab);//ap和ab的差积
-        decimal p2=bp.cross(bc);
+        float p1=ap.cross(ab);//ap和ab的差积
+        float p2=bp.cross(bc);
         if(p1*p2<0){
             return false;
         }
         Vector2f cp=p-c;
         Vector2f ca=a-c;
-        decimal p3=cp.cross(ca);
+        float p3=cp.cross(ca);
         if(p3*p2<0){
             return false;
         }
@@ -96,14 +96,14 @@ Vector2f ap;
         bc.x=c.x-b.x;
         bc.y=c.y-b.y;
 
-        decimal p1=ap.cross(ab);//ap和ab的差积
-        decimal p2=bp.cross(bc);
+        float p1=ap.cross(ab);//ap和ab的差积
+        float p2=bp.cross(bc);
         if(p1*p2<0){
             return false;
         }
         Vector2f cp=p-c;
         Vector2f ca=a-c;
-        decimal p3=cp.cross(ca);
+        float p3=cp.cross(ca);
         if(p3*p2<0){
             return false;
         }

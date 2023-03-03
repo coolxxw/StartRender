@@ -27,6 +27,8 @@ namespace RenderCore{
             f=-4;
             r=1;
             t=1;
+            l=0;
+            b=0;
             setHFieldView(3.1415923/3);
         }
 

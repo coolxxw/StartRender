@@ -88,7 +88,7 @@ void Gui::exec() {
         ImGui_ImplOpenGL2_Init();
 
         // Load Fonts
-        // - If no fonts are loaded, dear imgui will use the default font. You can also load multiple fonts and use ImGui::PushFont()/PopFont() to select them.
+        // - If no fonts are loaded, dear imgui will use the default font. You can also loadGlb multiple fonts and use ImGui::PushFont()/PopFont() to select them.
         // - AddFontFromFileTTF() will return the ImFont* so you can store it if you need to select the font among multiple.
         // - If the file cannot be loaded, the function will return NULL. Please handle those errors in your application (e.g. use an assertion, or display an error and quit).
         // - The fonts will be rasterized at a given size (w/ oversampling) and stored into a texture when calling ImFontAtlas::Build()/GetTexDataAsXXXX(), which ImGui_ImplXXXX_NewFrame below will call.

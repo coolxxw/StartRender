@@ -17,7 +17,7 @@ void ObjectOperator::calculateNormalVector() {
 
     if(faceLength==0) return;
 
-    auto *vn=new decimal[vertexLength];
+    auto *vn=new float[vertexLength];
     auto* vm=new Vector3f[vertexLength];
 
     for(int i=0;i<object->faceLength;i++){
@@ -65,12 +65,12 @@ void ObjectOperator::calculateCenterAndSize() {
     auto vertexLength=object->vertexLength;
 
 
-    decimal minX=Math::decimal_max;
-    decimal minY=Math::decimal_max;
-    decimal minZ=Math::decimal_max;
-    decimal maxX=0;
-    decimal maxY=0;
-    decimal maxZ=0;
+    float minX=Math::float_max;
+    float minY=Math::float_max;
+    float minZ=Math::float_max;
+    float maxX=0;
+    float maxY=0;
+    float maxZ=0;
 
     for(int i=0;i<vertexLength;i++){
         if(vertex[i].x > maxX){

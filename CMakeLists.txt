@@ -5,13 +5,11 @@ project(StartRender)
 set(CMAKE_CXX_STANDARD 11)
 
 #源码路径
-aux_source_directory(${PROJECT_SOURCE_DIR}/src/ DIR_SRCS)
 aux_source_directory(${PROJECT_SOURCE_DIR}/src/public DIR_SRCS)
 aux_source_directory(${PROJECT_SOURCE_DIR}/src/engine DIR_SRCS)
 aux_source_directory(${PROJECT_SOURCE_DIR}/src/object DIR_SRCS)
 aux_source_directory(${PROJECT_SOURCE_DIR}/src/platform DIR_SRCS)
-aux_source_directory(${PROJECT_SOURCE_DIR}/src/public DIR_SRCS)
-
+aux_source_directory(${PROJECT_SOURCE_DIR}/src/math DIR_SRCS)
 
 #UTF-8
 add_compile_options("$<$<C_COMPILER_ID:MSVC>:/utf-8>")
@@ -24,18 +22,21 @@ set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /Zi")
 set(CMAKE_EXE_LINKER_FLAGS_RELEASE "${CMAKE_EXE_LINKER_FLAGS_RELEASE} /DEBUG /OPT:REF /OPT:ICF")
 
 
-
+#以源代码的方式添加库
 #添加imgui
 include_directories(${PROJECT_SOURCE_DIR}/lib/imgui)
 aux_source_directory(${PROJECT_SOURCE_DIR}/lib/imgui IMGUI_SRC)
-
+#添加lodepng
+include_directories(${PROJECT_SOURCE_DIR}/lib/lodepng)
+aux_source_directory(${PROJECT_SOURCE_DIR}/lib/lodepng LODEPNG_SRC)
+aux_source_directory(${PROJECT_SOURCE_DIR}/src/test TEST_SRC)
 
 
 #输出目录
 SET (EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
 
-add_executable(${PROJECT_NAME} ${IMGUI_SRC} ${DIR_SRCS} )
-
+add_executable(${PROJECT_NAME} ${DIR_SRCS} ${IMGUI_SRC} ${LODEPNG_SRC}  src/Gui.cpp src/Gui.h src/main.cpp)
+add_executable(${PROJECT_NAME}_Test ${LODEPNG_SRC} ${TEST_SRC})
 
 #导入库
 #jsoncpp
@@ -54,8 +55,9 @@ target_link_libraries(${PROJECT_NAME}  ${GLFW3_LIB})
 target_link_libraries(${PROJECT_NAME}  opengl32.lib)
 include_directories(${PROJECT_SOURCE_DIR}/lib/glfw/include)
 
-#测试
-enable_testing()
-add_subdirectory(${PROJECT_SOURCE_DIR}/test)
+#boost filesystem
+include_directories(${PROJECT_SOURCE_DIR}/lib/filesystem)
+
+
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /FA")
 SET(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /O2 /arch:AVX2")

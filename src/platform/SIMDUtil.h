@@ -26,6 +26,8 @@ public:
 
     static Support support;
 
+    static bool avx2;
+
     static Support getSimdSupportInfo();
 
 };

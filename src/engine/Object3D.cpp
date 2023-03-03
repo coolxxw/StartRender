@@ -5,7 +5,7 @@
 #include <fstream>
 #include <sstream>
 #include "Object3D.h"
-#include "ObjectOperator.h"
+#include "../object/ObjectOperator.h"
 #include "../math/Math.h"
 
 
@@ -17,13 +17,19 @@ Object3D::Object3D() {
     vertex= nullptr;
     normalVector= nullptr;
     viewVertex= nullptr;
+    attributes= nullptr;
+    diffuseTexture= nullptr;
+    diffuseTextureHeight=0;
+    diffuseTextureWidth=0;
 }
 
 Object3D::~Object3D() {
-    delete face;
-    delete vertex;
-    delete normalVector;
-    delete viewVertex;
+    delete[] face;
+    delete[] vertex;
+    delete[] normalVector;
+    delete[] viewVertex;
+    delete[] attributes;
+    delete[] diffuseTexture;
 
     vertexLength=0;
     faceLength=0;
@@ -34,6 +40,14 @@ Object3D::~Object3D() {
 };
 
 Object3D::Object3D(ObjectFile *obj) {
+    face=nullptr;
+    vertex= nullptr;
+    normalVector= nullptr;
+    viewVertex= nullptr;
+    diffuseTexture= nullptr;
+    diffuseTextureWidth=0;
+    diffuseTextureHeight=0;
+
 
     vertexLength=obj->vertex.size();
     faceLength=obj->face.size();
@@ -43,12 +57,12 @@ Object3D::Object3D(ObjectFile *obj) {
     normalVector=new Vector3f[vertexLength];
     face=new Face[faceLength];
 
-    decimal minX=Math::decimal_max;
-    decimal minY=Math::decimal_max;
-    decimal minZ=Math::decimal_max;
-    decimal maxX=0;
-    decimal maxY=0;
-    decimal maxZ=0;
+    float minX=Math::float_max;
+    float minY=Math::float_max;
+    float minZ=Math::float_max;
+    float maxX=0;
+    float maxY=0;
+    float maxZ=0;
     for(int i=0;i<vertexLength;i++){
         vertex[i].x=obj->vertex[i].x;
         vertex[i].y=obj->vertex[i].y;

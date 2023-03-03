@@ -9,14 +9,14 @@
 using namespace Render;
 
 //绕轴旋转
-Matrix3f rotateAroundAxis(Vector3f axis,double angle){
+Matrix3f rotateAroundAxis(Vector3f axis,float angle){
    axis.normalization();
-   decimal x=axis.x;
-   decimal y=axis.y;
-   decimal z=axis.z;
+   float x=axis.x;
+   float y=axis.y;
+   float z=axis.z;
 
-   double s= sin(angle);
-   double c= cos(angle);
+   float s= sin(angle);
+   float c= cos(angle);
 
    return Matrix3f{
        x*x*(1-c)+c,x*y*(1-c)+z*s,x*z*(1-c)-y*s,

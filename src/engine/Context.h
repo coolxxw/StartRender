@@ -5,7 +5,7 @@
 #ifndef STARTRENDER_CONTEXT_H
 #define STARTRENDER_CONTEXT_H
 
-#include "../object/Object3D.h"
+#include "Object3D.h"
 #include "Camera.h"
 #include "Viewing.h"
 #include "Config.h"
@@ -41,9 +41,9 @@ namespace RenderCore{
         Render::LightParam light;
         std::vector<Object3D*> object;
         ClipSpace clipSpace;
-        decimal * zBuffer;
-        ARGB* frameBuffer;
-        decimal *triangularComponentBuffer;//三角形插值分量缓存
+        float * zBuffer;
+        RGBA* frameBuffer;
+        float *triangularComponentBuffer;//三角形插值分量缓存
     public:
         Context();
         ~Context();

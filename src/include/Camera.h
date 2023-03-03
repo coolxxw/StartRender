@@ -2,7 +2,7 @@
 // Created by xxw on 2023/2/21.
 //
 
-#ifndef STARTRENDER_CAMERANODE_H
+#ifndef STARTRENDER_CAMERA_H
 #define STARTRENDER_CAMERA_H
 
 namespace RenderCore{

@@ -18,11 +18,12 @@ namespace RenderCore{
 
     class RenderThread {
     public:
+        static bool isInit;
 
         volatile bool frameBufferLock;
         int maxFPS;
         long long frameCounter;//帧计数器
-        float fps;
+        float fps{};
 
         Render::RenderPaintInterface *paintImpl;
         void *thread;
@@ -44,11 +45,11 @@ namespace RenderCore{
         //注册渲染输出函数
         void registerPaintImpl(Render::RenderPaintInterface *paintImpl){this->paintImpl=paintImpl;}
         //设置帧率上限
-        void setMaxFPS(int fps);
+        void setMaxFPS(float newFps);
 
-        float getFps();
+        float getFps() const;
 
-        long long getFrameCounter();
+        long long getFrameCounter() const;
 
         //启动渲染线程
         void startRender();

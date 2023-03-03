@@ -18,7 +18,7 @@ Matrix4f Matrix4f::inverse() {
     if(det==0)
     {
         for(auto & i : inv.m){
-            for(decimal & j : i){
+            for(float & j : i){
                 j=NAN;
             }
         }

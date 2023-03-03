@@ -5,7 +5,7 @@
 #ifndef STARTRENDER_DEF_H
 #define STARTRENDER_DEF_H
 
-#define USE_DECIMAL_FLOAT64
+#define ENABLE_SIMD_SUPPORT
 
 
 

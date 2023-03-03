@@ -10,7 +10,7 @@
 
 class Matrix3f{
 public:
-    decimal m[3][3]{
+    float m[3][3]{
         1,0,0,
         0,1,0,
         0,0,1
@@ -65,7 +65,7 @@ public:
 
 class Matrix4f {
 public:
-    decimal m[4][4]{1,0,0,0,
+    float m[4][4]{1,0,0,0,
                     0,1,0,0,
                     0,0,1,0,
                     0,0,0,1};
