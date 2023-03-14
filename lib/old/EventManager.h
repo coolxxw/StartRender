@@ -6,9 +6,9 @@
 #define STARTRENDER_EVENTMANAGER_H
 
 #include <vector>
-#include "RenderThread.h"
+#include "RenderEngine.h"
 
-namespace Render{
+namespace render{
 
     class EventManager;
     class Event{
@@ -46,9 +46,9 @@ namespace Render{
 
     class ResetCameraEvent: public Event{
     public:
-        RenderCore::Camera camera;
+        render_core::Camera camera;
 
-        explicit ResetCameraEvent(RenderCore::Camera camera): camera(camera){}
+        explicit ResetCameraEvent(render_core::Camera camera): camera(camera){}
 
     private:
         void exec(Context *context) override;

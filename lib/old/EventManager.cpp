@@ -4,7 +4,7 @@
 
 #include "EventManager.h"
 
-using namespace Render;
+using namespace render;
 
 void EventManager::disposalAllEvent() {
     while(true){

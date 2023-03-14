@@ -9,7 +9,7 @@
 #include "RenderFrame.h"
 #include "Util.h"
 
-using namespace RenderCore;
+using namespace render_core;
 
 RenderFrame::RenderFrame(Context *context) : context(context) {}
 

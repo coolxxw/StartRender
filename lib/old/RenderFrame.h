@@ -8,7 +8,7 @@
 #include "../include/type.h"
 #include "Context.h"
 
-namespace RenderCore{
+namespace render_core{
 
     class RenderFrame {
     private:
