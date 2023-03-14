@@ -341,7 +341,7 @@ bool GltfFile::fillScene(render::Scene* sceneResource) {
         //顶点uv坐标
         if(!tex_coord.empty()){
             unsigned int dataLength=0;
-            auto data= this->getTexcoord(tex_coord.asInt(),&dataLength);
+            auto data= this->getTexCoord(tex_coord.asInt(), &dataLength);
             if(data!= nullptr){
                 auto index=sceneResource->addBuffer(data,dataLength);
                 sceneResource->bindUvTexture(meshId,index);
@@ -527,7 +527,7 @@ const byte *GltfFile::getPosition(unsigned int index, unsigned int *dataLength) 
     return d+byteOffset;
 }
 
-const byte *GltfFile::getTexcoord(unsigned int index, unsigned int *dataLength) {
+const byte *GltfFile::getTexCoord(unsigned int index, unsigned int *dataLength) {
     if (json->empty()) {
         return nullptr;
     }

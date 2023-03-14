@@ -50,7 +50,7 @@ private:
     //获取顶点数据 float表示
     const byte* getPosition(unsigned int index,unsigned int* dataLength);
     //uv贴图 float表示
-    const byte* getTexcoord(unsigned int index,unsigned int* dataLength);
+    const byte* getTexCoord(unsigned int index, unsigned int* dataLength);
     const byte* getTextureRGBA(unsigned int index,std::string& name,unsigned int *w, unsigned int *h);
     const byte* getJpegRGBA(const byte*data,unsigned int lenght,unsigned int *w, unsigned int *h);
     const byte* getPngRGBA(const byte*index,unsigned int lenght,unsigned int *w, unsigned int *h);

@@ -133,16 +133,17 @@ void FragmentShader::shading(
                 if(z == zbuffer[i*width+j]){
                     //通过z缓存测试
                     //开始着色
-                    float fixHa= ha * a.z / z;
-                    float fixHb= hb * b.z / z;
-                    float fixHc= hc * c.z / z;
 
-                    auto u= ua * fixHa + ub * fixHb + uc * fixHc;
-                    auto v= va * fixHa + vb * fixHb + vc * fixHc;
+                    float α= ha * a.z / z;
+                    float β= hb * b.z / z;
+                    float γ= hc * c.z / z;
+
+                    auto u= ua * α + ub * β + uc * γ;
+                    auto v= va * α + vb * β + vc * γ;
 
                     auto nrgb=normalTexture.getAttribute(u,v);
                     //插值顶点法向量
-                    auto vNormal= (aNormal * fixHa) + (bNormal * fixHb) + (cNormal * fixHc);
+                    auto vNormal= (aNormal * α) + (bNormal * β) + (cNormal * γ);
                     vNormal.normalization();
                     //查询法向量贴图
                     N=vNormal;
