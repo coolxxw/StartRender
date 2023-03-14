@@ -3,15 +3,15 @@
 //
 
 #include "../include/Render.h"
-#include "RenderThread.h"
+#include "RenderEngine.h"
 #include "../platform/SIMDUtil.h"
 
-using  Render::StartRender;
-using namespace RenderCore;
+using  render::StartRender;
+using namespace render_core;
 
 
 StartRender::StartRender(int width, int height) {
-    engine=new RenderThread();
+    engine=new RenderEngine();
     engine->contextUpdate->width=width;
     engine->contextUpdate->height=height;
 }
@@ -32,8 +32,8 @@ void StartRender::registerPaintImpl(RenderPaintInterface *paintImpl) {
     {engine->paintImpl=paintImpl;}
 }
 
-Render::Camera StartRender::getCamera() {
-    return Render::Camera(engine->contextUpdate);
+render::Camera StartRender::getCamera() {
+    return render::Camera(engine->contextUpdate);
 }
 
 
@@ -42,16 +42,20 @@ void StartRender::setSize(int width, int height) {
     engine->contextUpdate->height=height;
 }
 
-long long Render::StartRender::getFrameCounter() {
+long long render::StartRender::getFrameCounter() {
     return engine->getFrameCounter();
 }
 
-float Render::StartRender::getFps() {
+float render::StartRender::getFps() {
     return engine->getFps();
 }
 
-Render::LightParam& Render::StartRender::getLightParam() {
+render::LightParam& render::StartRender::getLightParam() {
     return engine->contextUpdate->light;
+}
+
+render::Scene render::StartRender::getScene() {
+    return Scene((SceneData*)engine->context->scene);
 }
 
 

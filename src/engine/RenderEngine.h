@@ -2,21 +2,22 @@
 // Created by xxw on 2022/11/10.
 //
 
-#ifndef STARTRENDER_RENDERTHREAD_H
-#define STARTRENDER_RENDERTHREAD_H
+#ifndef STARTRENDER_RENDERENGINE_H
+#define STARTRENDER_RENDERENGINE_H
 
 #include "Context.h"
-#include "Camera.h"
+#include "data/Camera.h"
 #include "../include/type.h"
-#include "RenderFrame.h"
+#include "../../lib/old/RenderFrame.h"
 #include "../include/Render.h"
+#include "GraphicsPipeline.h"
 
-namespace RenderCore{
+namespace render_core{
 
     class EventManager;
     class EventManager;
 
-    class RenderThread {
+    class RenderEngine {
     public:
         static bool isInit;
 
@@ -25,25 +26,25 @@ namespace RenderCore{
         long long frameCounter;//帧计数器
         float fps{};
 
-        Render::RenderPaintInterface *paintImpl;
+        render::RenderPaintInterface *paintImpl;
         void *thread;
         volatile bool threadExitFlag;
 
         Context *context;
         ContextUpdate *contextUpdate;
 
-        RenderFrame *renderFrame;
+        GraphicsPipeline *renderFrame;
         //EventManager *eventManager;
 
         friend class RenderEvent;
 
 
     public:
-        RenderThread();
-        ~RenderThread();
+        RenderEngine();
+        ~RenderEngine();
 
         //注册渲染输出函数
-        void registerPaintImpl(Render::RenderPaintInterface *paintImpl){this->paintImpl=paintImpl;}
+        void registerPaintImpl(render::RenderPaintInterface *paintImpl){ this->paintImpl=paintImpl;}
         //设置帧率上限
         void setMaxFPS(float newFps);
 
@@ -69,4 +70,4 @@ namespace RenderCore{
 }
 
 
-#endif //STARTRENDER_RENDERTHREAD_H
+#endif //STARTRENDER_RENDERENGINE_H

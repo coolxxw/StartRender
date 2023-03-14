@@ -6,14 +6,14 @@
 
 #include <lodepng_util.h>
 
-#include "RenderThread.h"
-#include "RenderFrame.h"
+#include "RenderEngine.h"
+#include "../../lib/old/RenderFrame.h"
 
-using namespace RenderCore;
+using namespace render_core;
 
-bool RenderCore::RenderThread::isInit=true;
+bool render_core::RenderEngine::isInit=true;
 
-RenderThread::RenderThread() {
+RenderEngine::RenderEngine() {
     if(!isInit){
         SIMDUtil::getSimdSupportInfo();
     }
@@ -26,11 +26,11 @@ RenderThread::RenderThread() {
     paintImpl= nullptr;
     context = new Context();
     contextUpdate=new ContextUpdate();
-    renderFrame = new RenderFrame(context);
+    renderFrame = new GraphicsPipeline(context);
     //eventManager=new EventManager(context);
 }
 
-RenderThread::~RenderThread() {
+RenderEngine::~RenderEngine() {
     while (thread){
         threadExitFlag= true;
     }
@@ -40,18 +40,18 @@ RenderThread::~RenderThread() {
     delete contextUpdate;
 }
 
-void RenderThread::setMaxFPS(float newFps) {
+void RenderEngine::setMaxFPS(float newFps) {
     this->fps=newFps;
 }
 
 static DWORD WINAPI ThreadProc(
         _In_ LPVOID lpParameter
 ){
-    auto* obj= (RenderThread*)lpParameter;
+    auto* obj= (RenderEngine*)lpParameter;
     return obj->renderThread();
 }
 
-void RenderThread::startRender() {
+void RenderEngine::startRender() {
     if(thread){
         return;
     }
@@ -59,13 +59,13 @@ void RenderThread::startRender() {
     thread=::CreateThread(nullptr,0,ThreadProc,this,0,0);
 }
 
-void RenderThread::stopRender() {
+void RenderEngine::stopRender() {
     threadExitFlag=true;
 }
 
 
 
-int RenderThread::renderThread() {
+int RenderEngine::renderThread() {
     int frameTimeStart=clock();
     long long frameStart=0;
     while(!threadExitFlag){
@@ -111,11 +111,11 @@ int RenderThread::renderThread() {
     return 0;
 }
 
-float RenderCore::RenderThread::getFps() const {
+float render_core::RenderEngine::getFps() const {
     return fps;
 }
 
-long long RenderCore::RenderThread::getFrameCounter() const {
+long long render_core::RenderEngine::getFrameCounter() const {
     return frameCounter;
 }
 

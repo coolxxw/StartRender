@@ -12,3 +12,10 @@
 支持diffuse贴图
 精度全部修改为float
 支持.gltf .glb
+
+20230314-1  
+代码重构  
+SDL+imgui图形框架  
+移除obj文件格式  
+gltf格式：读取顶点索引,顶点数据,uv,法线,贴图  
+贴图:法线贴图,baseColor贴图

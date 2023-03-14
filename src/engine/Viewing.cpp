@@ -4,7 +4,7 @@
 #include <cmath>
 #include "Viewing.h"
 
-using namespace RenderCore;
+using namespace render_core;
 
 Viewing::Viewing(const Camera &camera, ClipSpace clipSpace, int width, int height) {
     Vector3f w=-(camera.g);
@@ -29,18 +29,25 @@ Viewing::Viewing(const Camera &camera, ClipSpace clipSpace, int width, int heigh
     float f=clipSpace.f;
     float r=clipSpace.r;
     float l=clipSpace.l;
-
+#if 0
     Matrix4f per=Matrix4f{2*n/(r-l),0,(l+r)/(l-r),0,
                           0,2*n/(t-b),(b+t)/(b-t),0,
                           0,0,(f+n)/(n-f),2*f*n/(f-n),
                           0,0,1,0};
+#endif
+
+    Matrix4f per=Matrix4f{2*n/(r-l),0,(l+r)/(l-r),0,
+                          0,2*n/(t-b),(b+t)/(b-t),0,
+                          0,0,0,n,
+                          0,0,1,0};
 
     Matrix4f vp=Matrix4f{(float)height/2,0,0,(float )width/2,
-                         0,(float )-height/2,0,(float )height/2,
+                         0,(float )height/2,0,(float )height/2,
                          0,0,1,0,
                          0,0,0,1};
 
     matrix=vp*per*cam;
+
 
 }
 

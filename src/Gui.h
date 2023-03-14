@@ -50,9 +50,12 @@ public:
 
 };
 
-class Gui :Render::RenderPaintInterface{
+class GuiData;
+
+class Gui : render::RenderPaintInterface{
 private:
-    Render::StartRender *render;
+    GuiData* d;
+    render::StartRender *render;
     void* frameBuffer= nullptr;
     InOutLock frameBufferLock;
     int frameBuffer_h=0;

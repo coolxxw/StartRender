@@ -3,37 +3,31 @@
 //
 
 #include "Context.h"
-#include "../object/GltfFile.h"
+#include "../include/GltfFile.h"
 
-using namespace RenderCore;
+using namespace render_core;
 
 Context::Context() {
 
-    GltfFile file("bee.glb");
-    auto *obj=file.newMesh();
-    file.close();
-    //ObjectFile file=ObjectFile::LoadFromObjFile("jball.ob");
-    //auto* obj=new Object3D(&file);
-    if(obj&&obj->faceLength){
-        object.push_back(obj);
-    }
     width=0;
     height=0;
     zBuffer= nullptr;
     frameBuffer=nullptr;
     triangularComponentBuffer= nullptr;
+    scene=new SceneData;
 }
 
 
 
 Context::~Context() {
-    for(Object3D* obj:object){
-        delete obj;
+    for(auto i:obj){
+        delete i;
     }
 
     delete zBuffer;
     delete frameBuffer;
     delete triangularComponentBuffer;
+    delete scene;
 }
 
 void Context::update(ContextUpdate &contextUpdate) {
@@ -56,11 +50,6 @@ void Context::update(ContextUpdate &contextUpdate) {
     light=contextUpdate.light;
     //物体
     contextUpdate.objectLock.inUnlock();
-
-    for(auto o:contextUpdate.object){
-        object.push_back(o);
-    }
-    contextUpdate.object.clear();
 
     contextUpdate.objectLock.outUnlock();
 

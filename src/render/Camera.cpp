@@ -6,7 +6,7 @@
 #include "../engine/Context.h"
 #include "../math/Matrix.h"
 
-using namespace Render;
+using namespace render;
 
 //绕轴旋转
 Matrix3f rotateAroundAxis(Vector3f axis,float angle){
@@ -33,7 +33,7 @@ Matrix3f rotateAroundAxis(Vector3f axis,float angle){
 void  Camera::moveForward(double m) {
     Vector3f &e=context->camera.e;
     Vector3f &g=context->camera.g;
-    e=e+(g*m);
+    e=e+(g*(float )m);
 
 }
 

@@ -5,12 +5,12 @@
 #ifndef STARTRENDER_ACCESSOR_H
 #define STARTRENDER_ACCESSOR_H
 
-namespace RenderCore{
+namespace render_core{
     class Context;
 }
-using RenderCore::Context;
+using render_core::Context;
 
-namespace Render{
+namespace render{
 
     class Accessor{
     private:

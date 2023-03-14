@@ -4,5 +4,5 @@
 
 #include "../include/LightParam.h"
 
-namespace Render {
-} // Render
+namespace render {
+} // render

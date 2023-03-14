@@ -5,10 +5,10 @@
 #ifndef STARTRENDERCORE_CAMERA_H
 #define STARTRENDERCORE_CAMERA_H
 
-#include "../math/Vector.h"
+#include "../../math/Vector.h"
 
 
-namespace RenderCore{
+namespace render_core{
 
 //相机
     class Camera {
@@ -21,12 +21,7 @@ namespace RenderCore{
         Camera(): e(1, 0, 0), t(0, 0, 1), g(-1, 0, 0) {
 
         }
-
-
     };
-
-
-
 }
 
 #endif //STARTRENDERCORE_CAMERA_H

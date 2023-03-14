@@ -102,6 +102,8 @@ public:
     Vector3f operator*(float k) const{
         return Vector3f(k*x,k*y,k*z);
     }
+
+
     float operator*(const Vector3f& v) const{
         return x*v.x+y*v.y+z*v.z;
     }

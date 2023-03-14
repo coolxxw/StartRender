@@ -5,31 +5,30 @@
 #ifndef STARTRENDER_CONTEXT_H
 #define STARTRENDER_CONTEXT_H
 
-#include "Object3D.h"
-#include "Camera.h"
+#include "data/Camera.h"
 #include "Viewing.h"
 #include "Config.h"
 #include "../include/type.h"
 #include "Util.h"
+#include "data/Object.h"
+#include "data/SceneData.h"
 
 //渲染上下文
 
-namespace Render{
+namespace render{
     class Accessor;
 }
-using Render::Accessor;
+using render::Accessor;
 
-namespace RenderCore{
+namespace render_core{
 
     class ContextUpdate{
     public:
         Camera camera;
         int width;
         int height;
-        Render::LightParam light;
-        std::vector<Object3D*> object;
+        render::LightParam light;
         InOutLock objectLock;
-
     };
 
 
@@ -38,12 +37,13 @@ namespace RenderCore{
         Camera camera;
         int width;
         int height;
-        Render::LightParam light;
-        std::vector<Object3D*> object;
+        render::LightParam light;
+        std::vector<Object*> obj;
         ClipSpace clipSpace;
         float * zBuffer;
         RGBA* frameBuffer;
         float *triangularComponentBuffer;//三角形插值分量缓存
+        SceneData *scene;
     public:
         Context();
         ~Context();

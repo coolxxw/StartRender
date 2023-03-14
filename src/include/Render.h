@@ -8,18 +8,19 @@
 
 #include "Camera.h"
 #include "LightParam.h"
+#include "Scene.h"
 
-namespace RenderCore{
-    class RenderThread;
+namespace render_core{
+    class RenderEngine;
     class Context;
     class ContextUpdate;
 }
-using RenderCore::RenderThread;
-using RenderCore::Context;
-using RenderCore::ContextUpdate;
+using render_core::RenderEngine;
+using render_core::Context;
+using render_core::ContextUpdate;
 
 
-namespace Render{
+namespace render{
 
     class RenderPaintInterface{
     public:
@@ -28,8 +29,8 @@ namespace Render{
     };
 
     class StartRender {
-    private:
-        RenderThread *engine;
+    public:
+        RenderEngine *engine;
 
 
     public :
@@ -51,6 +52,8 @@ namespace Render{
         void start();
 
         void stop();
+
+        Scene getScene();
 
     };
 };

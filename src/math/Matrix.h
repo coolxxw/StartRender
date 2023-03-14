@@ -109,7 +109,7 @@ public:
     }
 
     //矩阵乘向量
-    Vector4f operator*(Vector4f& v){
+    Vector4f operator*(const Vector4f& v)const{
         Vector4f vec;
         vec.x=v.x*m[0][0]+v.y*m[0][1]+v.z*m[0][2]+v.w*m[0][3];
         vec.y=v.x*m[1][0]+v.y*m[1][1]+v.z*m[1][2]+v.w*m[1][3];

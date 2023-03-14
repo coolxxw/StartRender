@@ -5,9 +5,9 @@
 #include <cmath>
 #include "../include/Util.h"
 
-using namespace Render::Util;
+using namespace render::Util;
 
-void Render::Util::VectorToAngle(Vector3f vector,float *angle_h,float *angle_v){
+void render::Util::VectorToAngle(Vector3f vector, float *angle_h, float *angle_v){
     static float pi= asin(1.0f)*2;
     auto x=(float)vector.x;
     auto y=(float )vector.y;
@@ -55,7 +55,7 @@ void Render::Util::VectorToAngle(Vector3f vector,float *angle_h,float *angle_v){
 
 
 
-Vector3f Render::Util::AngleToVector(float angle_h,float angle_v){
+Vector3f render::Util::AngleToVector(float angle_h, float angle_v){
     float x=1,y=1,z=1;
     static float pi= asin(1.0f)*2;
 

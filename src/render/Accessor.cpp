@@ -3,7 +3,7 @@
 //
 #include "Accessor.h"
 
-Render::Accessor::Accessor(Context *context) {
+render::Accessor::Accessor(Context *context) {
 
 }
 

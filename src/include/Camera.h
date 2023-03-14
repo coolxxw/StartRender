@@ -5,18 +5,18 @@
 #ifndef STARTRENDER_CAMERA_H
 #define STARTRENDER_CAMERA_H
 
-namespace RenderCore{
+namespace render_core{
     class ContextUpdate;
 }
 
-namespace Render{
+namespace render{
     class StartRender;
     class Camera {
     private:
-        friend class Render::StartRender;
+        friend class render::StartRender;
 
-        RenderCore::ContextUpdate *context;
-        explicit Camera(RenderCore::ContextUpdate *context):context(context){}
+        render_core::ContextUpdate *context;
+        explicit Camera(render_core::ContextUpdate *context): context(context){}
 
     public:
         void moveForward(double m);

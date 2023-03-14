@@ -8,7 +8,7 @@
 #include "type.h"
 #include "../math/Vector.h"
 
-namespace Render {
+namespace render {
     //光照参数
     struct LightParam{
         Vector3f directionalLight;//平行光方向
@@ -26,6 +26,6 @@ namespace Render {
         }
     };
 
-} // Render
+} // render
 
 #endif //STARTRENDER_LIGHTPARAM_H

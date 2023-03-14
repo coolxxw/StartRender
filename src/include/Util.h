@@ -7,7 +7,7 @@
 
 #include "../math/Vector.h"
 
-namespace Render{
+namespace render{
     namespace Util{
 
         /**
