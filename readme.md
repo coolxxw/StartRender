@@ -12,11 +12,17 @@
 CMake+MSVC
 
 #### 第三方库
-SDL: 底层图形输出,只作为framebuffer输出与渲染逻辑无关  
-Imgui: GUI框架  
-ghc::filesystem: 解决不同操作系统path  
-lodepng: 解析png图像  
-trubo-jpeg:解析jpeg图像  
+[SDL](https://github.com/libsdl-org/SDL ):
+ 底层图形输出,只作为framebuffer输出与渲染逻辑无关    
+[Imgui](https://github.com/ocornut/imgui):
+ GUI框架  
+[ghc::filesystem](https://github.com/gulrak/filesystem):
+ 解决不同操作系统path  
+[lodepng](https://github.com/lvandeve/lodepng):
+ 解析png图像  
+[trubo-jpeg](https://github.com/libjpeg-turbo/libjpeg-turbo):
+解析jpeg图像   
+
 
 ### 渲染引擎特效
 math库  
