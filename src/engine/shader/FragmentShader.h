@@ -8,7 +8,7 @@
 
 #include "../../math/Vector.h"
 #include "../data/GBuffer.h"
-#include "../data/Texture.h"
+#include "../data/TextureMap.h"
 #include "../data/VertexAttribute.h"
 
 namespace render_core {
@@ -24,8 +24,9 @@ namespace render_core {
                 const Vector4f *vertex,
                 const Vector4f* preVertex,
                 const VertexAttribute *attribute,//2*width*height
-                Texture normalTexture,
-                Texture baseColorTexture,
+                TextureMap normalTexture,
+                TextureMap baseColorTexture,
+                TextureMap metalRoughnessTexture,
                 GBufferUnit *gBuffer//输出gbuffer width*height
         );
 

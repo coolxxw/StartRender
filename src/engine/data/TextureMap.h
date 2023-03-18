@@ -2,16 +2,28 @@
 // Created by xxw on 2023/3/8.
 //
 
-#ifndef STARTRENDER_TEXTURE_H
-#define STARTRENDER_TEXTURE_H
+#ifndef STARTRENDER_TEXTUREMAP_H
+#define STARTRENDER_TEXTUREMAP_H
 #include "../../include/type.h"
+#include "SceneData.h"
+
 namespace render_core{
-    struct Texture{
+    //双线性插值贴图映射
+    struct TextureMap{
+        TextureMap(){
+            width=1;
+            height=1;
+            static RGBA rgba[2*2]={RGBA(),RGBA(),RGBA(),RGBA()};
+            texture=rgba;
+        }
+        explicit TextureMap(render_core::SceneData::Texture *pTexture)
+        :width(pTexture->width),height(pTexture->height),texture((RGBA*)pTexture->data){}
+
         const RGBA* texture;
         unsigned width;
         unsigned height;
 
-        RGBAF getAttribute(float u,float v){
+        RGBAF getAttribute(float u,float v)const{
             u=u*(float)width-0.5f;
             v=v*(float)height-0.5f;
 
@@ -26,8 +38,8 @@ namespace render_core{
             auto P3=texture[(((int)d)%height)*width+((int)a)%width].toRGBAF();
             auto P4=texture[(((int)d)%height)*width+((int)b)%width].toRGBAF();
 
-            float h1=u-a;
-            float h2=b-u;
+            float h2=u-a;
+            float h1=b-u;
             float r1=P1.r*h1+P2.r*h2;
             float g1=P1.g*h1+P2.g*h2;
             float b1=P1.b*h1+P2.b*h2;
@@ -38,8 +50,8 @@ namespace render_core{
             float b2=P3.b*h1+P4.b*h2;
             float a2=P3.a*h1+P4.a*h2;
 
-            h1=v-c;
-            h2=d-v;
+            h2=v-c;
+            h1=d-v;
 
             r1=r1*h1+r2*h2;
             g1=g1*h1+g2*h2;
@@ -56,4 +68,4 @@ namespace render_core{
 }
 
 
-#endif //STARTRENDER_TEXTURE_H
+#endif //STARTRENDER_TEXTUREMAP_H

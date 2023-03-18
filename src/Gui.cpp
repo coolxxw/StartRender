@@ -48,7 +48,7 @@ void Gui::exec() {
 
     // Create window with SDL_Renderer graphics context
     SDL_WindowFlags window_flags = (SDL_WindowFlags)(SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI);
-    SDL_Window* window = SDL_CreateWindow("StartRender", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1280, 720, window_flags);
+    SDL_Window* window = SDL_CreateWindow("StartRender", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1024, 1024, window_flags);
     SDL_Renderer* renderer = SDL_CreateRenderer(window, -1,  SDL_RENDERER_SOFTWARE);
     if (renderer == NULL)
     {
@@ -105,9 +105,19 @@ void Gui::exec() {
     //设置下渲染引擎
     render->registerPaintImpl(this);
     auto scene=render->getScene();
-    //GltfFile *gltfFile=new GltfFile("ball.glb");
+    //加载天空盒
+    scene.addSkyBoxImage("./assets/skybox/front.jpg",render::Scene::SkyBoxDirection::Front);
+    scene.addSkyBoxImage("./assets/skybox/back.jpg",render::Scene::SkyBoxDirection::Back);
+    scene.addSkyBoxImage("./assets/skybox/top.jpg",render::Scene::SkyBoxDirection::Top);
+    scene.addSkyBoxImage("./assets/skybox/bottom.jpg",render::Scene::SkyBoxDirection::Bottom);
+    scene.addSkyBoxImage("./assets/skybox/left.jpg",render::Scene::SkyBoxDirection::Left);
+    scene.addSkyBoxImage("./assets/skybox/right.jpg",render::Scene::SkyBoxDirection::Right);
+    //加载模型
+    //GltfFile *gltfFile=new GltfFile("D:/IT/git/glTF-Sample-Models-master/2.0/BoomBoxWithAxes/glTF/BoomBoxWithAxes.gltf");
+    //GltfFile *gltfFile=new GltfFile("D:/IT/git/glTF-Sample-Models-master/2.0/MetalRoughSpheres/glTF/MetalRoughSpheres.gltf");
+   // GltfFile *gltfFile=new GltfFile("bee.glb");
    // GltfFile *gltfFile=new GltfFile("D:/IT/git/glTF-Sample-Models-master/2.0/NormalTangentTest/glTF/NormalTangentTest.gltf");
-    GltfFile *gltfFile=new GltfFile(R"(D:\IT\git\glTF-Sample-Models-master\2.0\DamagedHelmet\glTF\DamagedHelmet.gltf)");
+     GltfFile *gltfFile=new GltfFile(R"(D:\IT\git\glTF-Sample-Models-master\2.0\DamagedHelmet\glTF\DamagedHelmet.gltf)");
     gltfFile->fillScene(&scene);
     delete gltfFile;
     render->start();
@@ -165,21 +175,21 @@ void Gui::exec() {
             ImGui::Text("输出帧率: %.1f FPS", ImGui::GetIO().Framerate);
 
             if (ImGui::TreeNode("光照")) {
-                render::LightParam &lightParam = render->getLightParam();
+
                 ImGui::SeparatorText("默认直射光");
                 static float knobh = 0, knobv = 0;
-                render::Util::VectorToAngle(lightParam.directionalLight, &knobh, &knobv);
+                //render::Util::VectorToAngle(lightParam.directionalLight, &knobh, &knobv);
                 ImGui::SliderFloat("水平方向", &knobh, 0, 360);
                 ImGui::SliderFloat("垂直方向", &knobv, -90, 90);
-                lightParam.directionalLight = render::Util::AngleToVector(knobh, knobv);
+                //lightParam.directionalLight = render::Util::AngleToVector(knobh, knobv);
 
                 ImGui::SeparatorText("漫反射");
-                ImGui::SliderFloat("漫反射系数", &lightParam.diffuse.a, 0, 1.0f);
+                //ImGui::SliderFloat("漫反射系数", &lightParam.diffuse.a, 0, 1.0f);
                 ImGui::SeparatorText("镜面反射");
-                ImGui::SliderFloat("镜反射系数", &lightParam.specular.a, 0, 1.0f);
-                ImGui::SliderInt("指数", &lightParam.specularExponent, 1, 256);
+                //ImGui::SliderFloat("镜反射系数", &lightParam.specular.a, 0, 1.0f);
+                //ImGui::SliderInt("指数", &lightParam.specularExponent, 1, 256);
                 ImGui::SeparatorText("环境光");
-                ImGui::SliderFloat("环境光系数", &lightParam.ambient.a, 0, 1.0f);
+                //ImGui::SliderFloat("环境光系数", &lightParam.ambient.a, 0, 1.0f);
                 ImGui::TreePop();
             }
 

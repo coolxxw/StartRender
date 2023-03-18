@@ -6,7 +6,7 @@
 #define STARTRENDER_OBJECT_H
 
 #include "../../math/Vector.h"
-#include "Texture.h"
+#include "TextureMap.h"
 #include "VertexAttribute.h"
 
 namespace render_core{
@@ -17,6 +17,7 @@ namespace render_core{
         Vector3f centor;
         float size=1;
         bool update=false;
+        Matrix4f matrix;
         unsigned int indicesCount=0;
         unsigned int verticesCount=0;
         const unsigned int* indices= nullptr;
@@ -26,9 +27,9 @@ namespace render_core{
         VertexAttribute *attribute=nullptr;
         Vector3f* normal;
         float* uvTexture{};
-        Texture normalTexture={0};
-        Texture baseColorTexture={0};
-
+        TextureMap normalTexture;
+        TextureMap baseColorTexture;
+        TextureMap metalRoughnessTexture;
         explicit Object(unsigned int vertexNumber){
             verticesCount=vertexNumber;
             vertices=new Vector4f[vertexNumber];

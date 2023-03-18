@@ -9,8 +9,11 @@
 
 namespace render_core{
     struct GBufferUnit{
+        bool valid;
         Vector3f normal;
         RGBAF baseColor;
+        float metal;
+        float roughness;
     };
 
 

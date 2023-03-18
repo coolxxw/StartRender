@@ -8,6 +8,7 @@ set(CMAKE_CXX_STANDARD 11)
 aux_source_directory(${PROJECT_SOURCE_DIR}/src/ DIR_SRCS)
 aux_source_directory(${PROJECT_SOURCE_DIR}/src/render DIR_SRCS)
 aux_source_directory(${PROJECT_SOURCE_DIR}/src/engine DIR_SRCS)
+aux_source_directory(${PROJECT_SOURCE_DIR}/src/engine/shader DIR_SRCS)
 aux_source_directory(${PROJECT_SOURCE_DIR}/src/engine/data DIR_SRCS)
 aux_source_directory(${PROJECT_SOURCE_DIR}/src/render/file DIR_SRCS)
 aux_source_directory(${PROJECT_SOURCE_DIR}/src/platform DIR_SRCS)
@@ -37,8 +38,16 @@ aux_source_directory(${PROJECT_SOURCE_DIR}/src/test TEST_SRC)
 #输出目录
 SET (EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
 
-add_executable(${PROJECT_NAME} ${DIR_SRCS} ${IMGUI_SRC} ${LODEPNG_SRC} src/engine/shader/VertexShader.cpp src/engine/shader/VertexShader.h src/engine/data/Texture.h src/engine/shader/RasterizationShader.h src/engine/shader/RasterizationShader.cpp src/engine/shader/RasterizationShader.h src/engine/shader/ColorShader.cpp src/engine/shader/ColorShader.h src/engine/data/GBuffer.h src/engine/shader/FragmentShader.cpp src/engine/shader/FragmentShader.h src/engine/data/VertexAttribute.h)
+if(MSVC)
+    set(MY_VERSIONINFO_RC "${CMAKE_BINARY_DIR}/version.rc")
+    configure_file("${PROJECT_SOURCE_DIR}/version.rc"
+            "${MY_VERSIONINFO_RC}")
+endif()
+
+
+add_executable(${PROJECT_NAME} ${DIR_SRCS} ${IMGUI_SRC} ${LODEPNG_SRC} ${MY_VERSIONINFO_RC})
 add_executable(${PROJECT_NAME}_Test ${LODEPNG_SRC} ${TEST_SRC})
+
 
 #导入库
 #jsoncpp

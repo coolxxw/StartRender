@@ -25,7 +25,7 @@ RenderEngine::RenderEngine() {
     threadExitFlag=false;
     paintImpl= nullptr;
     context = new Context();
-    contextUpdate=new ContextUpdate();
+    contextUpdate=new ContextCache();
     renderFrame = new GraphicsPipeline(context);
     //eventManager=new EventManager(context);
 }

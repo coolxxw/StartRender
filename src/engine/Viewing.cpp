@@ -42,7 +42,7 @@ Viewing::Viewing(const Camera &camera, ClipSpace clipSpace, int width, int heigh
                           0,0,1,0};
 
     Matrix4f vp=Matrix4f{(float)height/2,0,0,(float )width/2,
-                         0,(float )height/2,0,(float )height/2,
+                         0,(float )-height/2,0,(float )height/2,
                          0,0,1,0,
                          0,0,0,1};
 

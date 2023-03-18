@@ -3,7 +3,7 @@
 //
 
 #include "Context.h"
-#include "../include/GltfFile.h"
+#include "../../include/GltfFile.h"
 
 using namespace render_core;
 
@@ -13,7 +13,6 @@ Context::Context() {
     height=0;
     zBuffer= nullptr;
     frameBuffer=nullptr;
-    triangularComponentBuffer= nullptr;
     scene=new SceneData;
 }
 
@@ -26,11 +25,10 @@ Context::~Context() {
 
     delete zBuffer;
     delete frameBuffer;
-    delete triangularComponentBuffer;
     delete scene;
 }
 
-void Context::update(ContextUpdate &contextUpdate) {
+void Context::update(ContextCache &contextUpdate) {
     //更新 分辨率
     if(width!=contextUpdate.width || height!=contextUpdate.height){
         width=contextUpdate.width;
@@ -38,20 +36,15 @@ void Context::update(ContextUpdate &contextUpdate) {
 
         delete zBuffer;
         delete frameBuffer;
-        delete triangularComponentBuffer;
+
 
         zBuffer=new float [width*height];
         frameBuffer=new RGBA[width * height];
-        triangularComponentBuffer=new float[width*height*4];
+
     }
     //相机
     camera=contextUpdate.camera;
     //光照
     light=contextUpdate.light;
-    //物体
-    contextUpdate.objectLock.inUnlock();
-
-    contextUpdate.objectLock.outUnlock();
-
 }
 

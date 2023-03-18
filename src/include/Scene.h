@@ -7,6 +7,7 @@
 #include <string>
 #include <vector>
 #include "../engine/data/Camera.h"
+#include "../math/Matrix.h"
 
 namespace render_core{
     class SceneData;
@@ -17,6 +18,16 @@ namespace render{
     class Scene {
 
     public:
+        enum SkyBoxDirection{
+            Top,
+            Left,
+            Right,
+            Bottom,
+            Front,
+            Back,
+
+        };
+
         typedef unsigned int TextureId;
         typedef unsigned int BufferId;
         typedef unsigned int MaterialId;
@@ -82,6 +93,10 @@ namespace render{
 
         bool bindMetallicRoughnessTexture(MaterialId material,TextureId texture);
 
+        bool translationMesh(MeshId meshId,Matrix4f matrix);
+
+
+        void addSkyBoxImage(std::string file,SkyBoxDirection);
 
     };
 }

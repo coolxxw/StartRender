@@ -7,11 +7,14 @@
 #include <string>
 #include <vector>
 
+#include "../../math/Matrix.h"
+
 namespace render_core{
 
     class SceneData {
     public:
 
+        //类型定义
         struct Buffer{
             unsigned int length=0;
             void* data=nullptr;
@@ -39,6 +42,17 @@ namespace render_core{
             unsigned int material=0;
             unsigned int normal=0;
             unsigned int uv=0;
+            Matrix4f matrix;
+        };
+
+        struct Skybox{
+            //索引Texture
+            unsigned int top=0;
+            unsigned int left=0;
+            unsigned int right=0;
+            unsigned int bottom=0;
+            unsigned int front=0;
+            unsigned int back=0;
         };
 
     public:
@@ -47,6 +61,7 @@ namespace render_core{
         std::vector<Texture*> textures;
         std::vector<Material*> materials;
         std::vector<Mesh> meshes;
+        Skybox skybox;
 
         SceneData(){
             buffers.resize(1);

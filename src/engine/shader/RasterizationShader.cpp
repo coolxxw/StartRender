@@ -64,7 +64,7 @@ static void shading2(
         auto b=vertex[indices[index*3+1]];
         auto c=vertex[indices[index*3+2]];
 
-        int left,right,top,bottom;
+        unsigned int left,right,top,bottom;
 
         if(false){
             left= (unsigned int) floor(fmax(0,fmin(a.x,fmin(b.x,c.x))));

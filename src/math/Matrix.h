@@ -6,6 +6,7 @@
 #define STARTRENDER_MATRIX_H
 
 #include "Vector.h"
+#include "Math.h"
 
 
 class Matrix3f{
@@ -109,7 +110,7 @@ public:
     }
 
     //矩阵乘向量
-    Vector4f operator*(const Vector4f& v)const{
+    Vector4f operator* (Vector4f v)const{
         Vector4f vec;
         vec.x=v.x*m[0][0]+v.y*m[0][1]+v.z*m[0][2]+v.w*m[0][3];
         vec.y=v.x*m[1][0]+v.y*m[1][1]+v.z*m[1][2]+v.w*m[1][3];
@@ -138,6 +139,43 @@ public:
         };
         *this=t*(*this);
     }
+
+
+    void rotate(Vector3f vec){
+        Matrix4f t={
+                1,0,0,0,
+                0,1,0,0,
+                0,0,1,0,
+                0,0,0,1
+        };
+        float theta=vec.x*Math::pi;
+
+        Matrix4f x={
+                1,0,0,0,
+                0,cos(theta),-sin(theta),0,
+                0,sin(theta),cos(theta),0,
+                0,0,0,1
+        };
+        theta=vec.y*Math::pi;
+        Matrix4f y={
+                cos(theta),0,sin(theta),0,
+                0,1,0,0,
+                -sin(theta),0,cos(theta),0,
+                0,0,0,1
+        };
+        theta=vec.z*Math::pi;
+        Matrix4f z={
+                cos(theta),-sin(theta),0,0,
+                sin(theta),cos(theta),0,0,
+                0,0,1,0,
+                0,0,0,1
+        };
+
+
+        t=z*y*x*t;
+        *this=t*(*this);
+    }
+
 
 
     Matrix4f inverse();//求逆

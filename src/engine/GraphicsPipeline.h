@@ -5,7 +5,7 @@
 #ifndef STARTRENDER_GRAPHICSPIPELINE_H
 #define STARTRENDER_GRAPHICSPIPELINE_H
 
-#include "Context.h"
+#include "data/Context.h"
 #include "shader/RasterizationShader.h"
 #include "data/GBuffer.h"
 
@@ -17,6 +17,9 @@ namespace render_core{
         unsigned gBufferWidth=0;
         unsigned gBufferHeight=0;
         GBufferUnit* gBuffer=nullptr;
+
+        Vector3f sceneMin=Vector3f{0,0,0};
+        Vector3f sceneMax=Vector3f{0,0,0};
 
         void prepare();
 

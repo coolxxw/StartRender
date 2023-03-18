@@ -5,7 +5,7 @@
 #ifndef STARTRENDER_RENDERENGINE_H
 #define STARTRENDER_RENDERENGINE_H
 
-#include "Context.h"
+#include "data/Context.h"
 #include "data/Camera.h"
 #include "../include/type.h"
 #include "../../lib/old/RenderFrame.h"
@@ -31,7 +31,7 @@ namespace render_core{
         volatile bool threadExitFlag;
 
         Context *context;
-        ContextUpdate *contextUpdate;
+        ContextCache *contextUpdate;
 
         GraphicsPipeline *renderFrame;
         //EventManager *eventManager;

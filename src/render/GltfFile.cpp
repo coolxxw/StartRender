@@ -12,6 +12,8 @@
 #include "turbojpeg.h"
 
 #include "../include/GltfFile.h"
+#include "../math/Matrix.h"
+#include "ImageTool.h"
 
 static bool icasecompare(const std::string& a, const std::string& b) {
     if (a.length() == b.length()) {
@@ -149,7 +151,7 @@ void GltfFile::close() {
         bin=nullptr;
         binLength=0;
         active= false;
-        for(auto i:this->uriData){
+        for(const auto& i:this->uriData){
             delete i.second.data;
         }
         for(auto i:this->tempData){
@@ -165,6 +167,7 @@ GltfFile::GltfFile() {
     bin=nullptr;
     json= nullptr;
     active=false;
+    binLength=0;
 }
 
 bool GltfFile::loadGltf(std::ifstream &file) {
@@ -187,6 +190,7 @@ bool GltfFile::loadGltf(std::ifstream &file) {
     this->json=jsonRoot;
     delete[] jsonData;
     this->active=true;
+    return true;
 }
 
 bool GltfFile::loadUriResource(const std::string& uri) {
@@ -210,6 +214,8 @@ bool GltfFile::loadUriResource(const std::string& uri) {
     }else{
         return false;
     }
+
+    return true;
 }
 
 const byte *GltfFile::getBuffer(unsigned int index, unsigned int *length) {
@@ -246,10 +252,9 @@ bool GltfFile::fillScene(render::Scene* sceneResource) {
     Json::Value textures;
 
     //解析第0个scenes
-    Json::Value node;
     Json::Value mesh;
     Json::Value material;
-
+    int nodeIndex=0;
     try{
         images=root->operator[](("images"));
         materials=root->operator[](("materials"));
@@ -258,162 +263,68 @@ bool GltfFile::fillScene(render::Scene* sceneResource) {
         scenes=root->operator[]("scenes");
         textures=root->operator[]("textures");
         //默认解析第0个scenes
-        int nodeIndex=scenes[0]["nodes"][0].asInt();
-        //获取根节点
-        node=nodes[nodeIndex];
+        nodeIndex=scenes[0]["nodes"][0].asInt();
+
     }catch (std::exception &e){
         std::cout<<e.what()<<std::endl;
         return false;
     }
 
-    //默认解析第0个mesh
-    if(!node["mesh"].empty()){
-        mesh=meshes[node["mesh"].asInt()];
-    }else{
-        //遍历所有children节点直至找到mesh
-        Json::Value children=node["children"];
-        for(const auto& child:nodes){
-            if(!child["mesh"].empty()){
-                mesh=meshes[child["mesh"].asInt()];
-                break;
+
+
+    //默认解析第0个node第0个节点
+    std::stack<int> stack;
+    std::stack<Matrix4f> stack2;
+    stack.push(nodeIndex);
+    stack2.push(Matrix4f());
+
+    //递归查找mesh 使用stack替代递归
+    while(!stack.empty()){
+        int node_i=stack.top();
+        stack.pop();
+        auto matrix=stack2.top();
+        stack2.pop();
+        auto node=nodes[node_i];
+        if(node.empty()){
+            continue;
+        }
+        if (!node["translation"].empty()) {
+            auto trans = node["translation"];
+            matrix.move(Vector3f(trans[0].asFloat(), trans[1].asFloat(), trans[2].asFloat()));
+        }
+        if (!node["scale"].empty()) {
+            auto scale = node["scale"];
+            matrix.scale(Vector3f(scale[0].asFloat(), scale[1].asFloat(), scale[2].asFloat()));
+        }
+        if (!node["rotation"].empty()) {
+            auto rotation = node["rotation"];
+            matrix.rotate(Vector3f(rotation[0].asFloat(), rotation[1].asFloat(), rotation[2].asFloat()));
+        }
+        if(!node["matrix"].empty()){
+            auto mn=node["matrix"];
+            auto matrix2= Matrix4f{mn[0].asFloat(),mn[4].asFloat(),mn[8].asFloat(),mn[12].asFloat(),
+                            mn[1].asFloat(),mn[5].asFloat(),mn[9].asFloat(),mn[13].asFloat(),
+                            mn[2].asFloat(),mn[6].asFloat(),mn[10].asFloat(),mn[14].asFloat(),
+                            mn[3].asFloat(),mn[7].asFloat(),mn[11].asFloat(),mn[15].asFloat()};
+            matrix=matrix*matrix2;
+        }
+        if(!node["mesh"].empty()) {
+            auto meshId = addMesh(sceneResource, node["mesh"].asInt());
+            sceneResource->translationMesh(meshId,matrix);
+        }
+
+        if(node["children"]){
+            for(auto i:node["children"]){
+                stack.push(i.asInt());
+                stack2.push(matrix);
             }
-        }
-    }
-
-    if(mesh.empty()){
-        return false;
-    }
-
-    auto meshId=0;
-    //mesh
-    {
-        if(!mesh["name"].empty()) {
-            meshId=sceneResource->createMesh(mesh["name"].asString());
-        }
-        auto primitives=mesh["primitives"];
-        if(primitives.empty()){
-            std::cout<<"can not find mesh.primitives int gltf"<<std::endl;
-            return false;
-        }
-        primitives=primitives[0];
-        if(primitives.empty()){
-            return false;
-        }
-        auto attributes=primitives["attributes"];
-        auto indices=primitives["indices"];
-        auto materialIndex=primitives["material"];
-        if(attributes.empty()){
-            return false;
-        }
-        auto position=attributes["POSITION"];
-        auto tex_coord=attributes["TEXCOORD_0"];
-        auto normal=attributes["NORMAL"];
-        //顶点索引
-        if(!indices.empty()){
-            unsigned int dataLength=0;
-            auto data= this->getIndices(indices.asInt(),&dataLength);
-            if(data!= nullptr){
-                auto index=sceneResource->addBuffer(data,dataLength);
-                sceneResource->bindIndices(meshId,index);
-            }
-        }
-        //顶点坐标
-        if(!position.empty()){
-            unsigned int dataLength=0;
-            auto data= this->getPosition(position.asInt(),&dataLength);
-            if(data!= nullptr){
-                auto index=sceneResource->addVertexBuffer(data,dataLength);
-                sceneResource->bindVertex(meshId, index);
-            }
-        }
-
-        //顶点法线
-        if(!normal.empty()){
-            unsigned int dataLength=0;
-            auto data= this->getNormal(position.asInt(),&dataLength);
-            if(data!= nullptr){
-                auto index=sceneResource->addBuffer(data,dataLength);
-                sceneResource->bindNormal(meshId, index);
-            }
-        }
-
-
-        //顶点uv坐标
-        if(!tex_coord.empty()){
-            unsigned int dataLength=0;
-            auto data= this->getTexCoord(tex_coord.asInt(), &dataLength);
-            if(data!= nullptr){
-                auto index=sceneResource->addBuffer(data,dataLength);
-                sceneResource->bindUvTexture(meshId,index);
-            }
-        }
-        if(!materialIndex.empty()){
-            material=materials[materialIndex.asInt()];
-        }
-    }
-
-    //材质
-    auto materialId=0;
-
-    Json::Value baseColorTexture;
-    Json::Value normalTexture;
-    Json::Value metallicRoughnessTexture;
-    if(!material.empty()){
-        if(!material["name"].empty()){
-            materialId=sceneResource->createMaterial(material["name"].asString());
-        }else{
-            materialId=sceneResource->createMaterial("material");
-        }
-        sceneResource->bindMaterial(meshId,materialId);
-        if(!material["normalTexture"].empty()){
-            normalTexture=material["normalTexture"]["index"];
-        }
-        auto pbrMetallicRoughness=material["pbrMetallicRoughness"];
-        if(!pbrMetallicRoughness["baseColorTexture"].empty()){
-            baseColorTexture=pbrMetallicRoughness["baseColorTexture"]["index"];
-        }
-        if(!pbrMetallicRoughness["metallicRoughnessTexture"].empty()){
-            metallicRoughnessTexture=pbrMetallicRoughness["metallicRoughnessTexture"]["index"];
-        }
-    }
-    //法线贴图
-    if(!normalTexture.empty()){
-        unsigned int w=0,h=0;
-        std::string name;
-        auto data= getTextureRGBA(normalTexture.asInt(),name,&w,&h);
-        if(data!=nullptr){
-            auto index=sceneResource->addTextureRGBA(name,data,w,h);
-            sceneResource->bindNormalTexture(materialId,index);
-        }
-
-    }
-
-    //baseColorTexture
-    if(!baseColorTexture.empty()){
-        unsigned int w=0,h=0;
-        std::string name;
-        auto data= getTextureRGBA(baseColorTexture.asInt(),name,&w,&h);
-        if(data!=nullptr){
-
-        }
-        auto index=sceneResource->addTextureRGBA(name,data,w,h);
-        sceneResource->bindBaseColorTexture(materialId,index);
-    }
-    //metallicRoughnessTexture
-    if(!metallicRoughnessTexture.empty()){
-        unsigned int w=0,h=0;
-        std::string name;
-        auto data= getTextureRGBA(metallicRoughnessTexture.asInt(),name,&w,&h);
-        if(data!=nullptr){
-            auto index=sceneResource->addTextureRGBA(name,data,w,h);
-            sceneResource->bindMetallicRoughnessTexture(materialId,index);
         }
 
     }
     return true;
 }
 
-const byte *GltfFile::getUriData(std::string uri_file, unsigned int *dataLength) {
+const byte *GltfFile::getUriData(const std::string& uri_file, unsigned int *dataLength) {
     if(this->uriData.find(uri_file) != this->uriData.end()){
         *dataLength = this->uriData[uri_file].length;
         return this->uriData[uri_file].data;
@@ -454,6 +365,7 @@ const byte *GltfFile::getIndices(unsigned int index, unsigned int *dataLength) {
         return nullptr;
     }
     auto bufferView=position["bufferView"];
+    auto byteOffset=position["byteOffset"];
     auto componentType=position["componentType"];
     auto count=position["count"];
     auto type=position["type"];
@@ -470,24 +382,25 @@ const byte *GltfFile::getIndices(unsigned int index, unsigned int *dataLength) {
     //unsigned short
     if(componentType.asInt()==5123){
         //检测长度 数量*标量1*UNSIGNED SHORT长度2
-        if(length<(count.asInt()*2)){
+        if((length+byteOffset.asInt())<(count.asInt()*2)){
             return nullptr;
         }
         int count_int=count.asInt();
-        auto bin=new unsigned int[count_int];
+        auto data=new unsigned int[count_int];
+        d=&(d[byteOffset.asInt()]);
         for(int i=0;i<count_int;i++){
-            bin[i]=((unsigned short *)d)[i];
+            data[i]=((unsigned short *)d)[i];
         }
-        this->tempData.push_back((void*)bin);
+        this->tempData.push_back((void*)data);
         *dataLength=count_int*4;
-        return (byte*)bin;
+        return (byte*)data;
     }else if(componentType.asInt()==5125){//unsigned int
         //检测长度 数量*标量1*UNSIGNED INT长度4
         if(length<(count.asInt()*4)){
             return nullptr;
         }
         *dataLength=length;
-        return d;
+        return d+byteOffset.asInt();
     }
     return nullptr;
 
@@ -668,45 +581,23 @@ const byte *GltfFile::getBufferView(unsigned int index, unsigned int* length) {
 }
 
 const byte *GltfFile::getPngRGBA(const byte* data,unsigned int length,unsigned int *w, unsigned int *h) {
-    std::vector<unsigned char > png ;
-    lodepng::decode(png,*w,*h,data,length);
-    if(*w>0 && *h>0){
-        auto* buffer=new unsigned char [(*w)*(*h)*4];
-        this->tempData.push_back(buffer);
-
-
-        return buffer;
+    auto d=render::ImageTool::PngToRGBA(data,length,w,h);
+    if(d){
+        this->tempData.push_back(d);
+        return (const byte*)d;
     }
-
     return nullptr;
 
 
 }
 
 const byte *GltfFile::getJpegRGBA(const byte* data,unsigned int length,unsigned int *w,unsigned int *h) {
-
-    //调用libjpeg turbo
-    auto tjHandle=tjInitDecompress();
-    if(tjHandle==0){
-        return nullptr;
+    auto d=render::ImageTool::JpegToRGBA(data,length,w,h);
+    if(d){
+        this->tempData.push_back(d);
+        return (const byte*)d;
     }
-    long unsigned int jpegSize=length; //!< _jpegSize from above
-    auto* compressedImage=new unsigned char [length]; //!< _compressedImage from above
-    memmove(compressedImage,data,length);
-
-    int jpegSubsamp, width, height;
-    tjDecompressHeader(tjHandle,compressedImage,jpegSize,&width,&height);
-    int bufferSize=width*height*4;
-    auto* buffer=new unsigned char [width*height*4];
-    tjDecompress(tjHandle,compressedImage,jpegSize,buffer,width,0,height,4,TJFLAG_FASTDCT);
-    delete[] compressedImage;
-    tjDestroy(tjHandle);
-
-    *w=width;
-    *h=height;
-    this->tempData.push_back(buffer);
-    return buffer;
-
+    return nullptr;
 }
 
 const byte* GltfFile::getNormal(int index, unsigned int *dataLength) {
@@ -740,6 +631,142 @@ const byte* GltfFile::getNormal(int index, unsigned int *dataLength) {
         return nullptr;
     }
     *dataLength=(count.asInt()*3*4);
-    return d+byteOffset;
+    return &(d[byteOffset]);
 }
+
+unsigned int GltfFile::addMesh(render::Scene *sceneResource, int index) {
+    unsigned int meshId;
+    Json::Value materials=json->operator[]("materials");
+    Json::Value meshes=json->operator[]("meshes");
+    Json::Value mesh=meshes[index];
+    Json::Value material;
+    //mesh
+    if(!mesh.empty())
+    {
+        if(!mesh["name"].empty()) {
+            meshId=sceneResource->createMesh(mesh["name"].asString());
+        }
+        auto primitives=mesh["primitives"];
+        if(primitives.empty()){
+            std::cout<<"can not find mesh.primitives int gltf"<<std::endl;
+            return meshId;
+        }
+        primitives=primitives[0];
+        if(primitives.empty()){
+            return meshId;
+        }
+        auto attributes=primitives["attributes"];
+        auto indices=primitives["indices"];
+        auto materialIndex=primitives["material"];
+        if(attributes.empty()){
+            return meshId;
+        }
+        auto position=attributes["POSITION"];
+        auto tex_coord=attributes["TEXCOORD_0"];
+        auto normal=attributes["NORMAL"];
+        //顶点索引
+        if(!indices.empty()){
+            unsigned int dataLength=0;
+            auto data= this->getIndices(indices.asInt(),&dataLength);
+            if(data!= nullptr){
+                auto i=sceneResource->addBuffer(data,dataLength);
+                sceneResource->bindIndices(meshId,i);
+            }
+        }
+        //顶点坐标
+        if(!position.empty()){
+            unsigned int dataLength=0;
+            auto data= this->getPosition(position.asInt(),&dataLength);
+            if(data!= nullptr){
+                auto i=sceneResource->addVertexBuffer(data,dataLength);
+                sceneResource->bindVertex(meshId, i);
+            }
+        }
+
+        //顶点法线
+        if(!normal.empty()){
+            unsigned int dataLength=0;
+            auto data= this->getNormal(normal.asInt(),&dataLength);
+            if(data!= nullptr){
+                auto i=sceneResource->addBuffer(data,dataLength);
+                sceneResource->bindNormal(meshId, i);
+            }
+        }
+
+
+        //顶点uv坐标
+        if(!tex_coord.empty()){
+            unsigned int dataLength=0;
+            auto data= this->getTexCoord(tex_coord.asInt(), &dataLength);
+            if(data!= nullptr){
+                auto i=sceneResource->addBuffer(data,dataLength);
+                sceneResource->bindUvTexture(meshId,i);
+            }
+        }
+        if(!materialIndex.empty()){
+            material=materials[materialIndex.asInt()];
+        }
+    }
+
+    //材质
+    unsigned int materialId;
+
+    Json::Value baseColorTexture;
+    Json::Value normalTexture;
+    Json::Value metallicRoughnessTexture;
+    if(!material.empty()){
+        if(!material["name"].empty()){
+            materialId=sceneResource->createMaterial(material["name"].asString());
+        }else{
+            materialId=sceneResource->createMaterial("material");
+        }
+        sceneResource->bindMaterial(meshId,materialId);
+        if(!material["normalTexture"].empty()){
+            normalTexture=material["normalTexture"]["index"];
+        }
+        auto pbrMetallicRoughness=material["pbrMetallicRoughness"];
+        if(!pbrMetallicRoughness["baseColorTexture"].empty()){
+            baseColorTexture=pbrMetallicRoughness["baseColorTexture"]["index"];
+        }
+        if(!pbrMetallicRoughness["metallicRoughnessTexture"].empty()){
+            metallicRoughnessTexture=pbrMetallicRoughness["metallicRoughnessTexture"]["index"];
+        }
+    }
+    //法线贴图
+    if(!normalTexture.empty()){
+        int i=addTexture(sceneResource,normalTexture.asInt());
+        sceneResource->bindNormalTexture(materialId,i);
+    }
+
+    //baseColorTexture
+    if(!baseColorTexture.empty()){
+        int i=addTexture(sceneResource,baseColorTexture.asInt());
+        sceneResource->bindBaseColorTexture(materialId,i);
+    }
+
+    //metallicRoughnessTexture
+    if(!metallicRoughnessTexture.empty()){
+        int i=addTexture(sceneResource,metallicRoughnessTexture.asInt());
+        sceneResource->bindMetallicRoughnessTexture(materialId,i);
+    }
+
+    return meshId;
+}
+
+int GltfFile::addTexture(render::Scene *scene, int index) {
+    if(textureMap.find(index)!=textureMap.end()){
+        return textureMap[index];
+    }
+    std::string name;
+    unsigned int w=0,h=0;
+    auto data=getTextureRGBA(index,name,&w,&h);
+    if(w>0&&h>0){
+        auto texId=scene->addTextureRGBA(name,data,w,h);
+        textureMap[index]=(int)texId;
+        return (int)texId;
+    }
+    return 0;
+
+}
+
 

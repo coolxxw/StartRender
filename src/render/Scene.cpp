@@ -1,7 +1,11 @@
 #include <utility>
 #include <cassert>
+#include <fstream>
 #include "../engine/data/SceneData.h"
 #include "../include/Scene.h"
+#include "../math/Matrix.h"
+#include "ImageTool.h"
+
 using render_core::SceneData;
 using Buffer = render_core::SceneData::Buffer;
 using Texture = render_core::SceneData::Texture;
@@ -250,4 +254,80 @@ bool render::Scene::bindNormal(render::Scene::MeshId mesh, render::Scene::Buffer
     }
     d->meshes[mesh].normal=normal;
     return true;
+}
+
+
+
+bool render::Scene::translationMesh(render::Scene::MeshId meshId, Matrix4f matrix) {
+    assert(this->d!=nullptr);
+    if(meshId<=0 || meshId>=d->meshes.size()){
+        return false;
+    }
+    auto v=this->d->meshes[meshId].vertex;
+    if(v<=0 &&v >d->buffers.size()){
+        return false;
+    }
+    auto vertex=(Vector4f*)d->buffers[v].data;
+    auto count=d->buffers[v].length/(4*4);
+    for (int i=0;i<count;i++){
+        Vector4f p=matrix*vertex[i];
+        vertex[i]=p*(1/p.w);
+    }
+
+    auto normalId=d->meshes[meshId].normal;
+
+    if(normalId>0 && normalId<d->buffers.size()){
+        Vector3f *n=(Vector3f*)d->buffers[normalId].data;
+        for (int i=0;i<count;i++){
+            Vector4f p=Vector4f(n[i].x,n[i].y,n[i].z,1);
+            p=matrix*p;
+            n[i].x=p.x;
+            n[i].y=p.y;
+            n[i].z=p.z;
+            n[i].normalization();
+
+        }
+
+
+    }
+
+
+    return true;
+}
+
+void render::Scene::addSkyBoxImage(std::string file, render::Scene::SkyBoxDirection direction) {
+    unsigned int width,height;
+    auto data=ImageTool::imageToRGBA(file,&width,&height);
+    if(data== nullptr){
+        return;
+    }
+    auto index= this->addTextureRGBA("",data,width,height);
+
+    switch(direction){
+
+
+        case Top:
+            d->skybox.top=index;
+            break;
+        case Left:
+            d->skybox.left=index;
+            break;
+        case Right:
+            d->skybox.right=index;
+            break;
+        case Bottom:
+            d->skybox.bottom=index;
+            break;
+        case Front:
+            d->skybox.front=index;
+            break;
+        case Back:
+            d->skybox.back=index;
+            break;
+    }
+
+
+
+
+
 }

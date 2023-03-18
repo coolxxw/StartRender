@@ -6,17 +6,41 @@
 #define STARTRENDER_COLORSHADER_H
 
 #include "../data/GBuffer.h"
-#include "../data/Texture.h"
-#include "../Config.h"
+#include "../data/TextureMap.h"
+#include "../data/Environment.h"
+#include "../data/CubeMap.h"
+
 
 namespace render_core {
     class ColorShader {
     public:
-        static void shading(unsigned int width,unsigned height,
-                            render::LightParam &lightParam,
-                            GBufferUnit* gbuffer,void *framebuffer);
+        unsigned int width;
+        unsigned height;
+        Vector3f cameraGear;
+        const Environment *lightParam;
+        GBufferUnit* gBuffer;
+        const CubeMap *skybox;
+        void *framebuffer;
 
-        static void shadingTexture(unsigned int width,unsigned height,Texture texture,void *framebuffer);
+
+    public:
+        void shading() const;
+
+        void shadingPbr() const;
+
+        void shadingNormal() const;
+
+        void shadingBaseColor() const;
+
+        void shadingMetal() const;
+
+        void shadingRoughness() const;
+
+        void shadingSkyBox() const;
+
+        static void shadingTexture(unsigned int width, unsigned height, TextureMap texture, void *framebuffer);
+
+
     };
 } // render_core
 

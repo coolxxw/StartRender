@@ -3,7 +3,7 @@
 //
 
 #include "../include/Camera.h"
-#include "../engine/Context.h"
+#include "../engine/data/Context.h"
 #include "../math/Matrix.h"
 
 using namespace render;
@@ -79,7 +79,7 @@ void  Camera::rotateAroundCenter(double a, double b) {
 
     Vector3f left=g.cross(t);
     //旋转反向
-    Vector3f r=left*a+t*b;
+    Vector3f r=left*a-t*b;
     Vector3f axis=r.cross(g);
     Matrix3f m= rotateAroundAxis(axis, sqrt(a*a+b*b));
     e=m*e;

@@ -7,17 +7,16 @@
 
 
 #include "Camera.h"
-#include "LightParam.h"
 #include "Scene.h"
 
 namespace render_core{
     class RenderEngine;
     class Context;
-    class ContextUpdate;
+    class ContextCache;
 }
 using render_core::RenderEngine;
 using render_core::Context;
-using render_core::ContextUpdate;
+using render_core::ContextCache;
 
 
 namespace render{
@@ -45,7 +44,6 @@ namespace render{
 
         Camera getCamera();
 
-        LightParam& getLightParam();
 
         void setSize(int width,int height);
 

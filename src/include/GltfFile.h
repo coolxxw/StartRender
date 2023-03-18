@@ -25,6 +25,7 @@ private:
     Json::Value* json;
     Json::Value* jsonBuffers;
     std::unordered_map<std::string,UriData> uriData;
+    std::unordered_map<int,int> textureMap;
     std::vector<void*> tempData;
     byte *bin;//glb文件内部BIN二进制数据
     int binLength;
@@ -41,7 +42,7 @@ private:
     bool loadGltf(std::ifstream &file);
     bool loadUriResource(const std::string &uri);
     const byte* getBuffer(unsigned int index,unsigned int *length);
-    const byte* getUriData(std::string uri_file, unsigned int *dataLength);
+    const byte* getUriData(const std::string& uri_file, unsigned int *dataLength);
 
     const byte* getBufferView(unsigned int index,unsigned int *length);
     //accessors
@@ -56,6 +57,9 @@ private:
     const byte* getPngRGBA(const byte*index,unsigned int lenght,unsigned int *w, unsigned int *h);
     const byte *getImage(unsigned int index, std::string &name, unsigned int *dataLength);
     const byte *getNormal(int i, unsigned int *dataLenght);
+
+    int addTexture(render::Scene* scene,int index);
+    unsigned int addMesh(render::Scene* scene, int index);
 
 
 public:

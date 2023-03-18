@@ -6,7 +6,7 @@
 #define STARTRENDER_CAMERA_H
 
 namespace render_core{
-    class ContextUpdate;
+    class ContextCache;
 }
 
 namespace render{
@@ -15,8 +15,8 @@ namespace render{
     private:
         friend class render::StartRender;
 
-        render_core::ContextUpdate *context;
-        explicit Camera(render_core::ContextUpdate *context): context(context){}
+        render_core::ContextCache *context;
+        explicit Camera(render_core::ContextCache *context): context(context){}
 
     public:
         void moveForward(double m);

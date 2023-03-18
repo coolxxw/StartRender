@@ -3,9 +3,6 @@
 #include <vld.h>
 #endif
 
-#include <iostream>
-#include "include/Render.h"
-#include "include/GltfFile.h"
 #include "Gui.h"
 
 
@@ -16,3 +13,4 @@ int main(){
     return 0;
 
 }
+

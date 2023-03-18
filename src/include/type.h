@@ -29,6 +29,16 @@ struct RGBA{
 
     explicit RGBA(byte r=0, byte g=0, byte b=0, byte a=255): a(a), r(r), g(g), b(b){}
 
+
+
+    //rgbaf值应介于0.0f~1.0f
+    explicit RGBA(const RGBAF rgbaf){
+        r=(byte)(rgbaf.r*255.0f);
+        g=(byte)(rgbaf.g*255.0f);
+        b=(byte)(rgbaf.b*255.0f);
+        a=(byte)(rgbaf.a*255.0f);
+    };
+
     RGBAF toRGBAF() const{
         return RGBAF((float)r/255.f,(float)g/255.f,(float)b/255.f,(float)a/255.f);
     }

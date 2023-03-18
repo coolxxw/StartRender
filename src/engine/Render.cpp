@@ -50,9 +50,6 @@ float render::StartRender::getFps() {
     return engine->getFps();
 }
 
-render::LightParam& render::StartRender::getLightParam() {
-    return engine->contextUpdate->light;
-}
 
 render::Scene render::StartRender::getScene() {
     return Scene((SceneData*)engine->context->scene);

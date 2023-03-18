@@ -12,8 +12,9 @@ void FragmentShader::shading(
         const Vector4f *vertex,
         const Vector4f* preVertex,
         const VertexAttribute  *attribute,//2*width*height
-        render_core::Texture normalTexture,
-        render_core::Texture baseColorTexture,
+        render_core::TextureMap normalTexture,
+        render_core::TextureMap baseColorTexture,
+        TextureMap metalRoughnessTexture,
         render_core::GBufferUnit *gBuffer) {
 
     auto count=indicesCount/3;
@@ -134,16 +135,18 @@ void FragmentShader::shading(
                     //通过z缓存测试
                     //开始着色
 
-                    float α= ha * a.z / z;
-                    float β= hb * b.z / z;
-                    float γ= hc * c.z / z;
+                    gBuffer[i*width+j].valid=true;
 
-                    auto u= ua * α + ub * β + uc * γ;
-                    auto v= va * α + vb * β + vc * γ;
+                    float fixHa= ha * a.z / z;
+                    float fixHb= hb * b.z / z;
+                    float fixHc= hc * c.z / z;
+
+                    auto u= ua * fixHa + ub * fixHb + uc * fixHc;
+                    auto v= va * fixHa + vb * fixHb + vc * fixHc;
 
                     auto nrgb=normalTexture.getAttribute(u,v);
                     //插值顶点法向量
-                    auto vNormal= (aNormal * α) + (bNormal * β) + (cNormal * γ);
+                    auto vNormal= (aNormal * fixHa) + (bNormal * fixHb) + (cNormal * fixHc);
                     vNormal.normalization();
                     //查询法向量贴图
                     N=vNormal;
@@ -155,9 +158,11 @@ void FragmentShader::shading(
 
                     gBuffer[i*width+j].normal.normalization();
 
-
                     gBuffer[i*width+j].baseColor=baseColorTexture.getAttribute(u,v);
 
+                    auto metalRoughness=metalRoughnessTexture.getAttribute(u,v);
+                    gBuffer[i*width+j].metal=metalRoughness.b;
+                    gBuffer[i*width+j].roughness=metalRoughness.g;
 
 
                     //结束着色

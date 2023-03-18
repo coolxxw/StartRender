@@ -18,7 +18,9 @@ namespace render_core{
         Vector3f g;
 
 
-        Camera(): e(1, 0, 0), t(0, 0, 1), g(-1, 0, 0) {
+        Camera(): e(0, 0, 1.5),
+        t(0,1,0),
+        g(0, 0, -1) {
 
         }
     };
