@@ -21,7 +21,9 @@ CMake+MSVC
 [lodepng](https://github.com/lvandeve/lodepng):
  解析png图像  
 [trubo-jpeg](https://github.com/libjpeg-turbo/libjpeg-turbo):
-解析jpeg图像   
+解析jpeg图像  
+[jsoncpp](https://github.com/open-source-parsers/jsoncpp):
+gltf文件json解析
 
 
 ### 渲染引擎特效
