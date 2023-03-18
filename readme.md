@@ -5,8 +5,9 @@
   
 
 ### 渲染图示例
-![](screenshot.png)
+![](screenshot-small.png)  
 
+[查看大图](screenshot.png)
 
 ### 构建环境
 CMake+MSVC
