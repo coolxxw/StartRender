@@ -1,18 +1,18 @@
-## 简单3D渲染引擎
-### 概述
+### 3D渲染引擎
+#### 概述
 一个C++语言编写的软光栅**实时渲染**引擎,大学毕业设计。  
-完全从零开始开发,在渲染部分不依赖任何框架。
+完全从零开始,在渲染部分不依赖任何框架。
   
 
-### 渲染图示例
+#### 渲染图示例
 ![](screenshot-small.png)  
 
 [查看大图](screenshot.png)
 
-### 构建环境
+#### 构建环境
 CMake+MSVC
 
-#### 第三方库
+##### 第三方库
 [SDL](https://github.com/libsdl-org/SDL ):
  底层图形输出,只作为framebuffer输出与渲染逻辑无关    
 [Imgui](https://github.com/ocornut/imgui):
@@ -27,7 +27,7 @@ CMake+MSVC
 gltf文件json解析
 
 
-### 渲染引擎特效
+#### 渲染引擎特效
 math库  
 光栅化优化  
 SIMD优化  
@@ -37,7 +37,7 @@ PBR渲染,部分代码参考unity shader
 支持baseColor,normal,metallic,roughness贴图
 支持简单CubeMap天空图
 
-### 待完善
+#### 待完善
 渲染颜色不准,Fresnel待修正  
 Mipmap,各项异性过滤  
 MSAA抗锯齿  
