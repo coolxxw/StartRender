@@ -11,9 +11,10 @@ namespace render_core{
     struct GBufferUnit{
         bool valid;
         Vector3f normal;
-        RGBAF baseColor;
-        float metal;
-        float roughness;
+        RGBAF baseColor;//基础颜色或反射率
+        float metallic;//金属度
+        float roughness;//主观粗糙度
+        RGBAF emission;//自发光
     };
 
 

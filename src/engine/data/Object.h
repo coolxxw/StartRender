@@ -30,6 +30,7 @@ namespace render_core{
         TextureMap normalTexture;
         TextureMap baseColorTexture;
         TextureMap metalRoughnessTexture;
+        TextureMap emissionTexture;
         explicit Object(unsigned int vertexNumber){
             verticesCount=vertexNumber;
             vertices=new Vector4f[vertexNumber];

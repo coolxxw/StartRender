@@ -28,7 +28,7 @@ public:
 
 Gui::Gui() {
     d=new GuiData;
-    render=new render::StartRender(0, 0);
+    render=new render::StartRender();
 }
 
 void Gui::exec() {
@@ -97,9 +97,12 @@ void Gui::exec() {
         chineseGlyph.AddText(e);
     }
     chineseGlyph.BuildRanges(&chineseRange);
+
     //加载字体 Windows 微软雅黑
     ImFont* font=io.Fonts->AddFontFromFileTTF("C:/Windows/Fonts/simhei.ttf",18.0f,NULL,chineseRange.Data);
-    //io.Fonts->AddFontFromFileTTF("assets/fonts/LXGWWenKai-Regular.ttf",18.0f,NULL,chineseRange.Data);
+    if(!font){
+        io.Fonts->AddFontFromFileTTF("assets/fonts/LXGWWenKai-Regular.ttf",18.0f,NULL,chineseRange.Data);
+    }
     //完成加载汉字字符表
 
     //设置下渲染引擎
@@ -127,6 +130,7 @@ void Gui::exec() {
 
     const unsigned int FPS=1000/60;//20可替换为限制的帧速
     Uint32 _FPS_Timer=0;
+    float guiAlpha=0.5;//gui透明度
 
     // Main loop
     while (!done) {
@@ -154,8 +158,9 @@ void Gui::exec() {
 
 
         //以下部分是Gui控件代码
-        int display_w =ImGui::GetIO().DisplaySize.x;
-        int display_h=ImGui::GetIO().DisplaySize.y;
+        ImGui::SetNextWindowBgAlpha(guiAlpha);
+        int display_w =(int)ImGui::GetIO().DisplaySize.x;
+        int display_h=(int)ImGui::GetIO().DisplaySize.y;
 
         render->setSize(display_w,display_h);
 
@@ -174,37 +179,86 @@ void Gui::exec() {
             ImGui::Text("渲染帧率: %.1f FPS  %lld", render->getFps(), render->getFrameCounter());
             ImGui::Text("输出帧率: %.1f FPS", ImGui::GetIO().Framerate);
 
-            if (ImGui::TreeNode("光照")) {
+            auto context= render->getContext();
+            auto light=&context->light;
 
-                ImGui::SeparatorText("默认直射光");
-                static float knobh = 0, knobv = 0;
-                //render::Util::VectorToAngle(lightParam.directionalLight, &knobh, &knobv);
-                ImGui::SliderFloat("水平方向", &knobh, 0, 360);
-                ImGui::SliderFloat("垂直方向", &knobv, -90, 90);
-                //lightParam.directionalLight = render::Util::AngleToVector(knobh, knobv);
-
-                ImGui::SeparatorText("漫反射");
-                //ImGui::SliderFloat("漫反射系数", &lightParam.diffuse.a, 0, 1.0f);
-                ImGui::SeparatorText("镜面反射");
-                //ImGui::SliderFloat("镜反射系数", &lightParam.specular.a, 0, 1.0f);
-                //ImGui::SliderInt("指数", &lightParam.specularExponent, 1, 256);
-                ImGui::SeparatorText("环境光");
-                //ImGui::SliderFloat("环境光系数", &lightParam.ambient.a, 0, 1.0f);
+            if (ImGui::TreeNode("GUI")) {
+                ImGui::SliderFloat("GUI透明", &guiAlpha, 0.0f, 1.0f);
                 ImGui::TreePop();
+            }
+
+            if (ImGui::TreeNode("光照")) {
+                if(ImGui::TreeNodeEx("直射光", ImGuiTreeNodeFlags_Selected)){
+                    if(ImGui::TreeNodeEx("方向", ImGuiTreeNodeFlags_Selected)){
+                        static float knobh = 0, knobv = 0;
+                        //render::Util::VectorToAngle(lightParam.directLightVector, &knobh, &knobv);
+                        ImGui::SliderFloat("水平方向", &knobh, 0, 360);
+                        ImGui::SliderFloat("垂直方向", &knobv, -90, 90);
+                        //lightParam.directLightVector = render::Util::AngleToVector(knobh, knobv);
+                        ImGui::TreePop();
+                    }
+                    if(ImGui::TreeNodeEx("颜色", ImGuiTreeNodeFlags_Selected)){
+                        ImGui::SliderFloat("R ##directLightColor", &light->directLightColor.r, 0.0f, 1.0f);
+                        ImGui::SliderFloat("G ##directLightColor", &light->directLightColor.g, 0.0f, 1.0f);
+                        ImGui::SliderFloat("B ##directLightColor", &light->directLightColor.b, 0.0f, 1.0f);
+                        ImGui::SliderFloat("A ##directLightColor", &light->directLightColor.a, 0.0f, 1.0f);
+                        ImGui::TreePop();
+                    }
+                    if(ImGui::TreeNodeEx("漫反射", ImGuiTreeNodeFlags_Selected)){
+                        ImGui::SliderFloat("R ## directDiffuse", &light->directLightDiffuseFact.r, 0.0f, 1.0f);
+                        ImGui::SliderFloat("G ## directDiffuse", &light->directLightDiffuseFact.g, 0.0f, 1.0f);
+                        ImGui::SliderFloat("B ## directDiffuse", &light->directLightDiffuseFact.b, 0.0f, 1.0f);
+                        ImGui::SliderFloat("F ## directDiffuse", &light->directLightDiffuseFact.a, 0.0f, 1.0f);
+                        ImGui::TreePop();
+                    }
+                    if(ImGui::TreeNodeEx("镜面反射", ImGuiTreeNodeFlags_Selected)){
+                        ImGui::SliderFloat("R ## directSpecular", &light->directLightSpecularFact.r, 0.0f, 1.0f);
+                        ImGui::SliderFloat("G ## directSpecular", &light->directLightSpecularFact.g, 0.0f, 1.0f);
+                        ImGui::SliderFloat("B ## directSpecular", &light->directLightSpecularFact.b, 0.0f, 1.0f);
+                        ImGui::SliderFloat("F ## directSpecular", &light->directLightSpecularFact.a, 0.0f, 1.0f);
+                        ImGui::TreePop();
+                    }
+                    ImGui::TreePop();
+                }
+                if(ImGui::TreeNodeEx("非直射光", ImGuiTreeNodeFlags_Selected)){
+                    if(ImGui::TreeNodeEx("漫反射", ImGuiTreeNodeFlags_Selected)){
+                        ImGui::SliderFloat("R ## indirectDiffuse", &light->indirectLightDiffuseFact.r, 0.0f, 1.0f);
+                        ImGui::SliderFloat("G ## indirectDiffuse", &light->indirectLightDiffuseFact.g, 0.0f, 1.0f);
+                        ImGui::SliderFloat("B ## indirectDiffuse", &light->indirectLightDiffuseFact.b, 0.0f, 1.0f);
+                        ImGui::SliderFloat("F ## indirectDiffuse", &light->indirectLightDiffuseFact.a, 0.0f, 1.0f);
+                        ImGui::TreePop();
+                    }
+                    if(ImGui::TreeNodeEx("镜面反射", ImGuiTreeNodeFlags_Selected)){
+                        ImGui::SliderFloat("R ## indirectSpecular", &light->indirectLightSpecularFact.r, 0.0f, 1.0f);
+                        ImGui::SliderFloat("G ## indirectSpecular", &light->indirectLightSpecularFact.g, 0.0f, 1.0f);
+                        ImGui::SliderFloat("B ## indirectSpecular", &light->indirectLightSpecularFact.b, 0.0f, 1.0f);
+                        ImGui::SliderFloat("F ## indirectSpecular", &light->indirectLightSpecularFact.a, 0.0f, 1.0f);
+                        ImGui::TreePop();
+                    }
+                    ImGui::TreePop();
+                }
+                if(ImGui::TreeNodeEx("自发光", ImGuiTreeNodeFlags_Selected)){
+                    ImGui::SliderFloat("R ## emission", &light->emissionLightFact.r, 0.0f, 1.0f);
+                    ImGui::SliderFloat("G ## emission", &light->emissionLightFact.g, 0.0f, 1.0f);
+                    ImGui::SliderFloat("B ## emission", &light->emissionLightFact.b, 0.0f, 1.0f);
+                    ImGui::SliderFloat("F ## emission", &light->emissionLightFact.a, 0.0f, 2.0f);
+                    ImGui::TreePop();
+                }
+                ImGui::TreePop();//光照
             }
 
             ImGui::End();
         } else {
 
             if (ImGui::IsMouseDown(ImGuiMouseButton_Left)) {
-                render::Camera camera = render->getCamera();
-                camera.rotateAroundCenter(io.MouseDelta.x / 200, io.MouseDelta.y / 200);
+                render::CameraController *camera = render->getCamera();
+                camera->rotateAroundCenter(io.MouseDelta.x / 200, io.MouseDelta.y / 200);
             }
 
 
             if (io.MouseWheel) {
-                render::Camera camera = render->getCamera();
-                camera.moveForward(io.MouseWheel / 100);
+                render::CameraController *camera = render->getCamera();
+                camera->moveForward(io.MouseWheel / 100);
             }
 
         }//if showController结束
@@ -273,19 +327,19 @@ void Gui::paint(void *buffer, int width, int height) {
 }
 
 
-void Gui::mousePosCallback(double x, double y) {
+void Gui::mousePosCallback(float x, float y) {
     if(mouseMoveFlag){
-        double a=x-mouseMoveX;
-        double b=y-mouseMoveY;
-        mouseMoveX=x;
-        mouseMoveY=y;
+        float a=x-this->mouseMoveX;
+        float b=y-this->mouseMoveY;
+        this->mouseMoveX=x;
+        this->mouseMoveY=y;
 
         printf("mouse\n");
-        render::Camera camera=render->getCamera();
-        camera.rotateAroundCenter(a/100,b/100);
+        render::CameraController *camera=render->getCamera();
+        camera->rotateAroundCenter(a/100.0f,b/100.0f);
 
     }else{
-        mouseMoveX=x;
-        mouseMoveY=y;
+        this->mouseMoveX=x;
+        this->mouseMoveY=y;
     }
 }

@@ -28,11 +28,11 @@ Context::~Context() {
     delete scene;
 }
 
-void Context::update(ContextCache &contextUpdate) {
+void Context::update(const render::ContextCache* contextUpdate) {
     //更新 分辨率
-    if(width!=contextUpdate.width || height!=contextUpdate.height){
-        width=contextUpdate.width;
-        height=contextUpdate.height;
+    if(width!=contextUpdate->width || height!=contextUpdate->height){
+        width=contextUpdate->width;
+        height=contextUpdate->height;
 
         delete zBuffer;
         delete frameBuffer;
@@ -43,8 +43,8 @@ void Context::update(ContextCache &contextUpdate) {
 
     }
     //相机
-    camera=contextUpdate.camera;
+    camera=contextUpdate->camera;
     //光照
-    light=contextUpdate.light;
+    light=contextUpdate->light;
 }
 

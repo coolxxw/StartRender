@@ -11,8 +11,8 @@
 #include "lodepng_util.h"
 #include "turbojpeg.h"
 
-#include "../include/GltfFile.h"
-#include "../math/Matrix.h"
+#include "../../include/GltfFile.h"
+#include "../../math/Matrix.h"
 #include "ImageTool.h"
 
 static bool icasecompare(const std::string& a, const std::string& b) {
@@ -714,6 +714,7 @@ unsigned int GltfFile::addMesh(render::Scene *sceneResource, int index) {
     Json::Value baseColorTexture;
     Json::Value normalTexture;
     Json::Value metallicRoughnessTexture;
+    Json::Value emissionTexture;
     if(!material.empty()){
         if(!material["name"].empty()){
             materialId=sceneResource->createMaterial(material["name"].asString());
@@ -730,6 +731,10 @@ unsigned int GltfFile::addMesh(render::Scene *sceneResource, int index) {
         }
         if(!pbrMetallicRoughness["metallicRoughnessTexture"].empty()){
             metallicRoughnessTexture=pbrMetallicRoughness["metallicRoughnessTexture"]["index"];
+        }
+        auto emissiveTexture=material["emissiveTexture"];
+        if(!emissiveTexture.empty()){
+            emissionTexture=emissiveTexture["index"];
         }
     }
     //法线贴图
@@ -748,6 +753,12 @@ unsigned int GltfFile::addMesh(render::Scene *sceneResource, int index) {
     if(!metallicRoughnessTexture.empty()){
         int i=addTexture(sceneResource,metallicRoughnessTexture.asInt());
         sceneResource->bindMetallicRoughnessTexture(materialId,i);
+    }
+
+    //emission自发光
+    if(!emissionTexture.empty()){
+        int i=addTexture(sceneResource,emissionTexture.asInt());
+        sceneResource->bindEmissionTexture(materialId,i);
     }
 
     return meshId;

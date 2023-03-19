@@ -18,7 +18,7 @@ void render_core::GraphicsPipeline::render() {
     colorShader.height=height;
     colorShader.framebuffer=context->frameBuffer;
     colorShader.gBuffer=gBuffer;
-    colorShader.lightParam=&context->light;
+    colorShader.environment=context->light;
     colorShader.cameraGear=context->camera.g;
     colorShader.skybox=&context->skybox;
 
@@ -71,11 +71,7 @@ void render_core::GraphicsPipeline::render() {
     //Gbuffer
     for(int i=1;i<context->obj.size();i++) {
         auto object = context->obj[i];
-        FragmentShader::shading(width, height, context->zBuffer, object->indices, object->indicesCount,
-                                object->vertices,object->preVertices,object->attribute,
-                                object->normalTexture,
-                                object->baseColorTexture,
-                                object->metalRoughnessTexture,
+        FragmentShader::shading(width, height, context->zBuffer, object,
                                 gBuffer);
     }
 
@@ -175,41 +171,38 @@ void render_core::GraphicsPipeline::prepare() {
             }
             o->preVertices=(Vector4f*)scene->buffers[mesh.vertex].data;
 
-            static RGBA defaultTexture[1*1]={RGBA(127,127,127)};
+
             auto material=scene->materials[mesh.material];
 
+            //准备法线贴图
             if( material ==nullptr || material->normalTexture==0){
-                static RGBA defaultNormalTexture[2*2]={RGBA{127,127,255,0},RGBA{127,127,255,0},RGBA{127,127,255,0},RGBA{127,127,255,0}};
-                o->normalTexture.width =1;
-                o->normalTexture.height =1;
-                o->normalTexture.texture = reinterpret_cast<const RGBA *>(&defaultNormalTexture);
+                o->normalTexture=TextureMap(Texture::defaultNormalTexture());
             }else{
-                o->normalTexture.width =scene->textures [material->normalTexture]->width;
-                o->normalTexture.height =scene->textures [material->normalTexture]->height;
-                o->normalTexture.texture =(RGBA*)scene->textures [material->normalTexture]->data;
+                o->normalTexture =TextureMap(scene->textures [material->normalTexture]);
             }
 
-
+            //准备颜色贴图
             if(material ==nullptr ||material->baseColorTexture==0){
-                static RGBA defaultColorTexture[2*2]={RGBA{127,127,127,0},RGBA{127,127,127,0},RGBA{127,127,127,0},RGBA{127,127,127,0}};
-                o->baseColorTexture.width =1;
-                o->baseColorTexture.height =1;
-                o->baseColorTexture.texture = reinterpret_cast<const RGBA *>(&defaultColorTexture);
+                o->baseColorTexture=TextureMap(Texture::defaultGrayColorTexture());
             }else{
-                o->baseColorTexture.width =scene->textures [material->baseColorTexture]->width;
-                o->baseColorTexture.height =scene->textures [material->baseColorTexture]->height;
-                o->baseColorTexture.texture =(RGBA*)scene->textures [material->baseColorTexture]->data;
+                o->baseColorTexture =TextureMap(scene->textures [material->baseColorTexture]);
             }
 
+            //准备金属粗糙度贴图
             if(material ==nullptr ||material->metallicRoughnessTexture==0){
-                o->metalRoughnessTexture.width =1;
-                o->metalRoughnessTexture.height =1;
-                o->metalRoughnessTexture.texture = reinterpret_cast<const RGBA *>(&defaultTexture);
+                o->metalRoughnessTexture=TextureMap(Texture::defaultBlackColorTexture());
             }else{
-                o->metalRoughnessTexture.width =scene->textures [material->metallicRoughnessTexture]->width;
-                o->metalRoughnessTexture.height =scene->textures [material->metallicRoughnessTexture]->height;
-                o->metalRoughnessTexture.texture =(RGBA*)scene->textures [material->metallicRoughnessTexture]->data;
+                o->metalRoughnessTexture=TextureMap(scene->textures [material->metallicRoughnessTexture]);
             }
+
+            //准备自发光贴图
+            if(material ==nullptr ||material->emissionTexture==0){
+                o->emissionTexture=TextureMap(Texture::defaultBlackColorTexture());
+            }else{
+                o->emissionTexture=TextureMap(scene->textures [material->emissionTexture]);
+            }
+
+
 
             float x_min=FLT_MAX,x_max=-FLT_MAX,y_min=FLT_MAX,y_max=-FLT_MAX,z_min=FLT_MAX,z_max=-FLT_MAX;
             for (int o_i=0; o_i < o->verticesCount; o_i++){

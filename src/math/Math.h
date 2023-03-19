@@ -5,7 +5,7 @@
 #ifndef STARTRENDER_MATH_H
 #define STARTRENDER_MATH_H
 
-#include "../platform/def.h"
+#include "../engine//platform/def.h"
 
 class Math {
 public:

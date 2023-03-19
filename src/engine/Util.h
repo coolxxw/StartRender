@@ -8,7 +8,7 @@
 
 
 #include "../math/Vector.h"
-#include "../platform/SIMDUtil.h"
+#include "../engine/platform/SIMDUtil.h"
 
 class Util {
 public:

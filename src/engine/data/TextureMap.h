@@ -16,7 +16,7 @@ namespace render_core{
             static RGBA rgba[2*2]={RGBA(),RGBA(),RGBA(),RGBA()};
             texture=rgba;
         }
-        explicit TextureMap(render_core::SceneData::Texture *pTexture)
+        explicit TextureMap(render_core::Texture *pTexture)
         :width(pTexture->width),height(pTexture->height),texture((RGBA*)pTexture->data){}
 
         const RGBA* texture;

@@ -7,7 +7,7 @@
 #include <lodepng_util.h>
 
 #include "RenderEngine.h"
-#include "../../lib/old/RenderFrame.h"
+
 
 using namespace render_core;
 
@@ -25,7 +25,8 @@ RenderEngine::RenderEngine() {
     threadExitFlag=false;
     paintImpl= nullptr;
     context = new Context();
-    contextUpdate=new ContextCache();
+    contextCacheAlloc= new ContextCacheAlloc();
+    createContentCache(context,&contextCacheAlloc->contextCache);
     renderFrame = new GraphicsPipeline(context);
     //eventManager=new EventManager(context);
 }
@@ -37,7 +38,7 @@ RenderEngine::~RenderEngine() {
     delete renderFrame;
     //delete eventManager;
     delete context;
-    delete contextUpdate;
+    delete contextCacheAlloc;
 }
 
 void RenderEngine::setMaxFPS(float newFps) {
@@ -71,7 +72,7 @@ int RenderEngine::renderThread() {
     while(!threadExitFlag){
 
         //处理事件
-        context->update(*contextUpdate);
+        context->update(&contextCacheAlloc->contextCache);
        // eventManager->disposalAllEvent();
 
         //限制帧率
@@ -119,7 +120,17 @@ long long render_core::RenderEngine::getFrameCounter() const {
     return frameCounter;
 }
 
+void render_core::RenderEngine::createContentCache(const Context *context1, render::ContextCache *cache) {
+    cache->camera=context1->camera;
+    cache->width=context1->width;
+    cache->height=context1->height;
+    cache->light=context1->light;
+}
 
+
+render::ContextCache *RenderEngine::getContextCache(){
+    return &contextCacheAlloc->contextCache;
+}
 
 
 

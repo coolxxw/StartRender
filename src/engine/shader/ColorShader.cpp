@@ -94,20 +94,13 @@ void ColorShader::shadingTexture(unsigned int width, unsigned int height, Textur
 
 
 
-
-
 void ColorShader::shadingNormal() const {
     RGBA* frame=(RGBA*)framebuffer;
     for(int i=0;i<height;i++){
         for (int j=0;j<width;j++){
             auto f= gBuffer[i*width+j].normal;
-            RGBA color;
-            color.r=(int)((float)255*(f.x*0.5+0.5));
-            color.g=(int)((float)255*(f.y*0.5+0.5));
-            color.b=(int)((float)255*(f.z*0.5+0.5));
-            color.a=(int)((float)255*1);
-
-            frame[i*width+j]=color;
+            RGBAF color=RGBAF(f.x,f.y,f.z);
+            frame[i*width+j]=RGBA(color);
         }
     }
 }
@@ -117,14 +110,8 @@ ColorShader::shadingBaseColor() const {
     RGBA* frame=(RGBA*)framebuffer;
     for(int i=0;i<height;i++){
         for (int j=0;j<width;j++){
-            auto f= gBuffer[i*width+j].baseColor;
-            RGBA color;
-            color.r=(int)((float)255*f.r);
-            color.g=(int)((float)255*f.g);
-            color.b=(int)((float)255*f.b);
-            color.a=(int)((float)255*f.a);
-
-            frame[i*width+j]=color;
+            auto color= gBuffer[i*width+j].baseColor;
+            frame[i*width+j]=RGBA(color);
         }
     }
 }
@@ -133,14 +120,9 @@ void ColorShader::shadingMetal() const {
     RGBA* frame=(RGBA*)framebuffer;
     for(int i=0;i<height;i++){
         for (int j=0;j<width;j++){
-            auto f= gBuffer[i*width+j].metal;
-            RGBA color;
-            color.r=(int)((float)255*f);
-            color.g=(int)((float)255*f);
-            color.b=(int)((float)255*f);
-            color.r=(int)((float)255*f);
-
-            frame[i*width+j]=color;
+            auto f= gBuffer[i*width+j].metallic;
+            auto color=RGBAF(f,f,f);
+            frame[i * width + j] =  RGBA(color);
         }
     }
 }
@@ -151,15 +133,34 @@ ColorShader::shadingRoughness() const {
     for (int i = 0; i < height; i++) {
         for (int j = 0; j < width; j++) {
             auto f = gBuffer[i * width + j].roughness;
-            RGBA color;
-            color.r = (int) ((float) 255 * f);
-            color.g = (int) ((float) 255 * f);
-            color.b = (int) ((float) 255 * f);
-            color.a = (int) ((float) 255 * f);
-
-            frame[i * width + j] = color;
+            auto color=RGBAF(f,f,f);
+            frame[i * width + j] =  RGBA(color);
         }
     }
+}
+
+void
+ColorShader::shadingEmission() const {
+    RGBA *frame = (RGBA *) framebuffer;
+    for (int i = 0; i < height; i++) {
+        for (int j = 0; j < width; j++) {
+            auto color = gBuffer[i * width + j].emission;
+            frame[i * width + j] = RGBA(color);
+        }
+    }
+}
+
+
+static inline RGBAF RgbaMulRgba(RGBAF c1,RGBAF c2){
+    return RGBAF(c1.r*c2.r,c1.g*c2.g,c1.b*c2.b,c1.a*c2.a);
+}
+
+static inline RGBAF RgbMulFloat(RGBAF c1,float f){
+    return RGBAF(c1.r*f,c1.g*f,c1.b*f,c1.a);
+}
+
+static inline RGBAF RgbAdd(RGBAF c1,RGBAF c2){
+    return RGBAF(c1.r+c2.r,c1.g+c2.g,c1.b+c2.b,c1.a);
 }
 
 
@@ -235,37 +236,40 @@ static inline Vector3f symmetryVector(const Vector3f& a,const Vector3f& b){
     return Vector3f(x,y,z);
 }
 
-static RGBA inline pbr(Vector3f n,Vector3f v,Vector3f l,RGBAF color,float metallic,float perceptualRoughness,const CubeMap *skybox){
+static RGBA inline pbr(const Environment& env, Vector3f n,Vector3f v,Vector3f l,RGBAF color,RGBAF emission,float metallic,float perceptualRoughness,const CubeMap *skybox){
+
+    RGBAF finalColor=RGBAF(0,0,0);//最终颜色
+
     //计算specular_brdf
     Vector3f h=v+l;
     h.normalization();
 
-    float ambient=0.3;//环境光
-    float light=0.6;//直射光
 
     //roughness平方 转换成真实粗糙度
     float roughness= perceptualRoughness*perceptualRoughness;
     roughness=roughness<0.02f?0.02f:roughness;
 
     float diffuseRate=1;//漫反射率
-    Vector3f specColor=Vector3f{0,0,0};//镜面反射f0
+    Vector3f specF0=Vector3f{0,0,0};//镜面反射f0
     //转换漫反射 f0
-    DiffuseAndSpecularFromMetallic(color,metallic,&specColor,&diffuseRate);
+    DiffuseAndSpecularFromMetallic(color,metallic,&specF0,&diffuseRate);
 
-    float diffuseColor=0;
-    Vector3f specularColor=Vector3f{0,0,0};
+    RGBAF diffuseColor=RGBAF(0,0,0);
+    RGBAF specularColor=RGBAF(0,0,0);
 
     RGBAF ambientSpecularLight;
 
     float NdotL=n*l;
     float NdotV=n*v;
 
+    //直射光
     if(NdotL>0 && NdotV>0){
 
-        //计算漫反射
+        //计算漫反射颜色
         float diffuseTerm= DisneyDiffuse(NdotV,NdotL,l*h,perceptualRoughness);
-        diffuseColor=diffuseTerm*NdotL*diffuseRate;
-
+        auto diffuseColorTerm=diffuseTerm*NdotL*diffuseRate;
+        diffuseColor=RgbMulFloat(color,diffuseColorTerm);
+        diffuseColor= RgbaMulRgba(env.directLightDiffuseFact,diffuseColor);
 
         //计算镜面反射
         float specularTerm= GGXTerm(n*h,roughness)* GGXVisibilityTerm(NdotL,NdotV,roughness);
@@ -275,21 +279,20 @@ static RGBA inline pbr(Vector3f n,Vector3f v,Vector3f l,RGBAF color,float metall
         specularTerm*=NdotL;
 
         //计算菲涅尔效应
-        Vector3f fresnelTerm= FresnelTerm(specColor*(1-diffuseColor),h*l);
-
-        specularColor=fresnelTerm*(specularTerm);
-
-
+        Vector3f fresnelTerm= FresnelTerm(specF0*(1-diffuseColorTerm),h*l);
+        auto specularColorTerm= fresnelTerm*specularTerm;
+        specularColor.r=env.directLightSpecularFact.r*specularColorTerm.x;
+        specularColor.g=env.directLightSpecularFact.g*specularColorTerm.y;
+        specularColor.b=env.directLightSpecularFact.b*specularColorTerm.z;
     }
 
 
-    //补上环境光
-    diffuseColor=diffuseColor*light+ambient*diffuseRate;
+    //非直射光漫反射
+    RGBAF indirectDiffuseColor= RgbMulFloat( color,diffuseRate);
+    indirectDiffuseColor= RgbaMulRgba( indirectDiffuseColor,env.indirectLightDiffuseFact);
 
-
-
-
-    //计算环境光反射
+    //计算非直射光镜面反射
+    RGBAF indirectSpecularColor=RGBAF(0,0,0);
     if(NdotV>0){
         //计算环境光镜面反射
         float surfaceReduction = 1.0f-0.28f*roughness*perceptualRoughness;
@@ -297,37 +300,54 @@ static RGBA inline pbr(Vector3f n,Vector3f v,Vector3f l,RGBAF color,float metall
         Vector3f invView= symmetryVector(v,n);
         ambientSpecularLight = skybox->get(invView);
         float grazingTerm = 1-roughness + (1-diffuseRate);
-        auto ambientSpecularColor=FresnelLerp(specColor,grazingTerm,n*v);
+        auto ambientSpecularColor=FresnelLerp(specF0,grazingTerm,n*v);
         ambientSpecularColor.x*=ambientSpecularLight.r;
         ambientSpecularColor.y*=ambientSpecularLight.g;
         ambientSpecularColor.z*=ambientSpecularLight.b;
-        specularColor=specularColor*light+ambientSpecularColor;
+        indirectSpecularColor.r=ambientSpecularColor.x*env.indirectLightSpecularFact.r;
+        indirectSpecularColor.g=ambientSpecularColor.y*env.indirectLightSpecularFact.g;
+        indirectSpecularColor.b=ambientSpecularColor.z*env.indirectLightSpecularFact.b;
     }
 
+    //计算自发光
+    auto emissionColor= RgbaMulRgba(emission,env.emissionLightFact);
 
+    auto dColor= RgbAdd(diffuseColor,indirectDiffuseColor);
+    auto sColor= RgbAdd(specularColor,indirectSpecularColor);
+    finalColor= RgbAdd(dColor,sColor);
+    finalColor= RgbAdd(finalColor,emissionColor);
 
-    float r=(color.r*(diffuseColor))+specularColor.x;
-    float g=(color.g*(diffuseColor))+specularColor.y;
-    float b=(color.b*(diffuseColor))+specularColor.z;
+    finalColor.r=finalColor.r>1.0f?1.0f:finalColor.r;
+    finalColor.g=finalColor.g>1.0f?1.0f:finalColor.g;
+    finalColor.b=finalColor.b>1.0f?1.0f:finalColor.b;
 
-    r=r>1?1:r;
-    g=g>1?1:g;
-    b=b>1?1:b;
-
-    return RGBA(RGBAF(r,g,b));
+    return RGBA(finalColor);
 
 }
 
 
 void ColorShader::shadingPbr() const {
-    auto l=-lightParam->directionalLight;
+    auto l=-environment.directLightVector;
     auto v=-cameraGear;
+
+    //转换Evn
+    Environment env=this->environment;
+    env.directLightDiffuseFact= RgbaMulRgba(env.directLightDiffuseFact,env.directLightColor);
+    env.directLightSpecularFact= RgbaMulRgba(env.directLightSpecularFact,env.directLightColor);
+    env.directLightDiffuseFact= RgbMulFloat(env.directLightDiffuseFact,env.directLightDiffuseFact.a);
+    env.directLightSpecularFact= RgbMulFloat(env.directLightSpecularFact,env.directLightSpecularFact.a);
+
+    env.indirectLightDiffuseFact= RgbMulFloat(env.indirectLightDiffuseFact,env.indirectLightDiffuseFact.a);
+    env.indirectLightSpecularFact= RgbMulFloat(env.indirectLightSpecularFact,env.indirectLightSpecularFact.a);
+
+    env.emissionLightFact= RgbMulFloat(env.emissionLightFact,env.emissionLightFact.a);
+
 
     RGBA* frame=(RGBA*)framebuffer;
     for(int i=0;i<height;i++){
         for (int j=0;j<width;j++){
             if(gBuffer[i*width+j].valid){
-                frame[i*width+j]= pbr(gBuffer[i*width+j].normal,v,l,gBuffer[i*width+j].baseColor,gBuffer[i*width+j].metal,gBuffer[i*width+j].roughness,skybox);
+                frame[i*width+j]= pbr(env,gBuffer[i*width+j].normal, v, l, gBuffer[i*width+j].baseColor,gBuffer[i*width+j].emission, gBuffer[i*width+j].metallic, gBuffer[i * width + j].roughness, skybox);
             }
 
 

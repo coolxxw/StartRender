@@ -5,39 +5,44 @@
 #ifndef STARTRENDER_RENDERENGINE_H
 #define STARTRENDER_RENDERENGINE_H
 
-#include "data/Context.h"
-#include "data/Camera.h"
 #include "../include/type.h"
-#include "../../lib/old/RenderFrame.h"
+#include "data/Context.h"
+#include "../include/Camera.h"
 #include "../include/Render.h"
+#include "../include/ContextCache.h"
 #include "GraphicsPipeline.h"
 
 namespace render_core{
 
-    class EventManager;
-    class EventManager;
+    class ContextCacheAlloc{
+        void* _;
+    public:
+        render::ContextCache contextCache;
+    };
 
     class RenderEngine {
     public:
         static bool isInit;
 
         volatile bool frameBufferLock;
-        int maxFPS;
+        int maxFPS=60;
         long long frameCounter;//帧计数器
-        float fps{};
+        float fps=0;
 
         render::RenderPaintInterface *paintImpl;
         void *thread;
         volatile bool threadExitFlag;
 
         Context *context;
-        ContextCache *contextUpdate;
+        ContextCacheAlloc *contextCacheAlloc;
 
         GraphicsPipeline *renderFrame;
         //EventManager *eventManager;
 
         friend class RenderEvent;
 
+
+        render::ContextCache *getContextCache();
 
     public:
         RenderEngine();
@@ -61,7 +66,7 @@ namespace render_core{
 
     private:
 
-
+        static void createContentCache(const Context* context1,render::ContextCache* cache);
 
 
     };

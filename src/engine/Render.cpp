@@ -4,16 +4,16 @@
 
 #include "../include/Render.h"
 #include "RenderEngine.h"
-#include "../platform/SIMDUtil.h"
+#include "../engine/platform/SIMDUtil.h"
+#include "../include/ContextCache.h"
 
 using  render::StartRender;
 using namespace render_core;
+using render::Camera;
 
 
-StartRender::StartRender(int width, int height) {
+StartRender::StartRender() {
     engine=new RenderEngine();
-    engine->contextUpdate->width=width;
-    engine->contextUpdate->height=height;
 }
 
 StartRender::~StartRender() {
@@ -32,14 +32,11 @@ void StartRender::registerPaintImpl(RenderPaintInterface *paintImpl) {
     {engine->paintImpl=paintImpl;}
 }
 
-render::Camera StartRender::getCamera() {
-    return render::Camera(engine->contextUpdate);
-}
 
 
 void StartRender::setSize(int width, int height) {
-    engine->contextUpdate->width=width;
-    engine->contextUpdate->height=height;
+    engine->contextCacheAlloc->contextCache.width=width;
+    engine->contextCacheAlloc->contextCache.height=height;
 }
 
 long long render::StartRender::getFrameCounter() {
@@ -53,6 +50,14 @@ float render::StartRender::getFps() {
 
 render::Scene render::StartRender::getScene() {
     return Scene((SceneData*)engine->context->scene);
+}
+
+render::CameraController *render::StartRender::getCamera() {
+    return (CameraController*)&engine->getContextCache()->camera;
+}
+
+render::ContextCache* const render::StartRender::getContext() {
+    return engine->getContextCache();
 }
 
 

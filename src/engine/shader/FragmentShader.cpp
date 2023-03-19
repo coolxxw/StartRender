@@ -6,16 +6,18 @@
 
 using namespace render_core;
 
-void FragmentShader::shading(
-        unsigned int width, unsigned int height, const float *zbuffer,
-        const unsigned int *indices, unsigned int indicesCount,
-        const Vector4f *vertex,
-        const Vector4f* preVertex,
-        const VertexAttribute  *attribute,//2*width*height
-        render_core::TextureMap normalTexture,
-        render_core::TextureMap baseColorTexture,
-        TextureMap metalRoughnessTexture,
-        render_core::GBufferUnit *gBuffer) {
+void FragmentShader::shading(unsigned int width, unsigned int height, const float *zBuffer,const Object* object,GBufferUnit *gBuffer) {
+
+    const unsigned int *indices=object->indices;
+    unsigned int indicesCount=object->indicesCount;
+    const Vector4f *vertex=object->vertices;
+    const Vector4f* preVertex=object->preVertices;
+    const VertexAttribute  *attribute=object->attribute;//2*width*height
+    TextureMap normalTexture=object->normalTexture;
+    TextureMap baseColorTexture=object->baseColorTexture;
+    TextureMap metalRoughnessTexture=object->metalRoughnessTexture;
+    TextureMap emissionTexture=object->emissionTexture;
+
 
     auto count=indicesCount/3;
     for (auto index=0;index<count;index++){
@@ -131,7 +133,7 @@ void FragmentShader::shading(
 
 
                 float z=a.z*ha+b.z*hb+c.z*hc; // 映射到0-2 值越大离相机越近
-                if(z == zbuffer[i*width+j]){
+                if(z == zBuffer[i*width+j]){
                     //通过z缓存测试
                     //开始着色
 
@@ -160,9 +162,14 @@ void FragmentShader::shading(
 
                     gBuffer[i*width+j].baseColor=baseColorTexture.getAttribute(u,v);
 
+                    //金属粗糙度
                     auto metalRoughness=metalRoughnessTexture.getAttribute(u,v);
-                    gBuffer[i*width+j].metal=metalRoughness.b;
+                    gBuffer[i*width+j].metallic=metalRoughness.b;
                     gBuffer[i*width+j].roughness=metalRoughness.g;
+
+                    //自发光
+                    auto emission=emissionTexture.getAttribute(u,v);
+                    gBuffer[i*width+j].emission=emission;
 
 
                     //结束着色

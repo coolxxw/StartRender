@@ -7,20 +7,21 @@
 
 #include "../data/GBuffer.h"
 #include "../data/TextureMap.h"
-#include "../data/Environment.h"
+#include "../../include/Environment.h"
 #include "../data/CubeMap.h"
 
 
 namespace render_core {
+    using render::Environment;
     class ColorShader {
     public:
         unsigned int width;
         unsigned height;
         Vector3f cameraGear;
-        const Environment *lightParam;
         GBufferUnit* gBuffer;
         const CubeMap *skybox;
         void *framebuffer;
+        Environment environment;
 
 
     public:
@@ -41,6 +42,7 @@ namespace render_core {
         static void shadingTexture(unsigned int width, unsigned height, TextureMap texture, void *framebuffer);
 
 
+        void shadingEmission() const;
     };
 } // render_core
 

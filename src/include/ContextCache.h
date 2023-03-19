@@ -8,13 +8,15 @@
 #include "Camera.h"
 #include "Environment.h"
 
-namespace render_core{
+namespace render{
+
     class ContextCache{
+
     public:
-        Camera camera;
-        int width;
-        int height;
+        int width=0;
+        int height=0;
         Environment light;
+        Camera camera;
     };
 
 }

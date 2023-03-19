@@ -62,8 +62,8 @@ private:
     int frameBuffer_w=0;
     bool showController=false;
     bool mouseMoveFlag=false;
-    double mouseMoveX=0;
-    double mouseMoveY=0;
+    float mouseMoveX=0;
+    float mouseMoveY=0;
 
 
 
@@ -76,7 +76,7 @@ public:
 
     void keyCallback(int key, int scancode, int action, int mods);
     void mouseCallback(int button,int action,int mods);
-    void mousePosCallback(double x,double y);
+    void mousePosCallback(float x,float y);
 
 private:
     void paint(void *frameBuffer,int width,int height) override;

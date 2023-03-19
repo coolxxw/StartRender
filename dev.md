@@ -23,3 +23,7 @@ gltf格式：读取顶点索引,顶点数据,uv,法线,贴图
 20230318-1
 添加PBR渲染,PBR渲染待优化
 添加Skybox,使用CubeMap映射Skybox
+
+20230319-3  
+添加emission贴图  
+GUI可调整光照参数

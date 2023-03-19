@@ -3,7 +3,7 @@
 //
 #include <intrin.h>
 #include "VertexShader.h"
-#include "../../platform/SIMDUtil.h"
+#include "../../engine/platform/SIMDUtil.h"
 
 using namespace render_core;
 

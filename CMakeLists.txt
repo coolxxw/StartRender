@@ -6,12 +6,12 @@ set(CMAKE_CXX_STANDARD 11)
 
 #源码路径
 aux_source_directory(${PROJECT_SOURCE_DIR}/src/ DIR_SRCS)
-aux_source_directory(${PROJECT_SOURCE_DIR}/src/render DIR_SRCS)
+aux_source_directory(src/engine/render DIR_SRCS)
 aux_source_directory(${PROJECT_SOURCE_DIR}/src/engine DIR_SRCS)
 aux_source_directory(${PROJECT_SOURCE_DIR}/src/engine/shader DIR_SRCS)
 aux_source_directory(${PROJECT_SOURCE_DIR}/src/engine/data DIR_SRCS)
-aux_source_directory(${PROJECT_SOURCE_DIR}/src/render/file DIR_SRCS)
-aux_source_directory(${PROJECT_SOURCE_DIR}/src/platform DIR_SRCS)
+aux_source_directory(src/engine/render/file DIR_SRCS)
+aux_source_directory(src/engine/platform DIR_SRCS)
 aux_source_directory(${PROJECT_SOURCE_DIR}/src/math DIR_SRCS)
 aux_source_directory(${PROJECT_SOURCE_DIR}/src/scene DIR_SRCS)
 #UTF-8
@@ -39,7 +39,7 @@ aux_source_directory(${PROJECT_SOURCE_DIR}/src/test TEST_SRC)
 SET (EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
 
 if(MSVC)
-    set(MY_VERSIONINFO_RC "${CMAKE_BINARY_DIR}/version.rc")
+    set(MY_VERSIONINFO_RC "${CMAKE_BINARY_DIR}/version.rc" src/engine/data/Texture.h)
     configure_file("${PROJECT_SOURCE_DIR}/version.rc"
             "${MY_VERSIONINFO_RC}")
 endif()

@@ -5,7 +5,7 @@
 #ifndef STARTRENDER_TYPE_H
 #define STARTRENDER_TYPE_H
 
-#include "../platform/def.h"
+#include "../engine/platform/def.h"
 
 #ifndef byte
 typedef unsigned char byte;

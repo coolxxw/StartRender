@@ -5,23 +5,20 @@
 #ifndef STARTRENDER_CONTEXT_H
 #define STARTRENDER_CONTEXT_H
 
-#include "Camera.h"
+#include "../../include/Camera.h"
+#include "../../include/Environment.h"
 #include "../Viewing.h"
 #include "../../include/type.h"
 #include "../Util.h"
 #include "Object.h"
 #include "SceneData.h"
-#include "ContextCache.h"
 #include "CubeMap.h"
+#include "../../include/ContextCache.h"
 
 //渲染上下文
 
-namespace render{
-    class Accessor;
-}
-using render::Accessor;
-
 namespace render_core{
+
 
     //渲染上下文
     class Context {
@@ -30,7 +27,7 @@ namespace render_core{
         int height;//帧缓冲高度
         RGBA* frameBuffer;//帧缓冲
         Camera camera;//相机
-        render_core::Environment light;
+        render::Environment light;
         SceneData *scene;
         std::vector<Object*> obj;
         CubeMap skybox;
@@ -42,7 +39,7 @@ namespace render_core{
         Context();
         ~Context();
 
-        void update(ContextCache& contextUpdate);
+        void update(const render::ContextCache* contextUpdate);
 
     };
 

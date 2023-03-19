@@ -6,7 +6,7 @@
 #define STARTRENDER_SCENE_H
 #include <string>
 #include <vector>
-#include "../engine/data/Camera.h"
+#include "Camera.h"
 #include "../math/Matrix.h"
 
 namespace render_core{
@@ -95,9 +95,9 @@ namespace render{
 
         bool translationMesh(MeshId meshId,Matrix4f matrix);
 
-
         void addSkyBoxImage(std::string file,SkyBoxDirection);
 
+        bool bindEmissionTexture(MaterialId material, TextureId emission);
     };
 }
 

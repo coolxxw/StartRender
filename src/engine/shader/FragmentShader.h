@@ -10,6 +10,7 @@
 #include "../data/GBuffer.h"
 #include "../data/TextureMap.h"
 #include "../data/VertexAttribute.h"
+#include "../data/Object.h"
 
 namespace render_core {
     class FragmentShader {
@@ -17,16 +18,9 @@ namespace render_core {
 
         static void shading(
                 unsigned int width,
-                unsigned int heigth,
-                const float *zbuffer,//输入zbuffer width*height
-                const unsigned int *indices,
-                unsigned int indicesCount,
-                const Vector4f *vertex,
-                const Vector4f* preVertex,
-                const VertexAttribute *attribute,//2*width*height
-                TextureMap normalTexture,
-                TextureMap baseColorTexture,
-                TextureMap metalRoughnessTexture,
+                unsigned int height,
+                const float *zBuffer,//输入zbuffer width*height
+                const Object* object,
                 GBufferUnit *gBuffer//输出gbuffer width*height
         );
 

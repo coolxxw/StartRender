@@ -6,17 +6,15 @@
 #define STARTRENDER_RENDER_H
 
 
-#include "Camera.h"
+#include "CameraController.h"
 #include "Scene.h"
+#include "ContextCache.h"
 
 namespace render_core{
     class RenderEngine;
-    class Context;
-    class ContextCache;
 }
 using render_core::RenderEngine;
-using render_core::Context;
-using render_core::ContextCache;
+
 
 
 namespace render{
@@ -33,7 +31,7 @@ namespace render{
 
 
     public :
-        StartRender(int width,int height);
+        StartRender();
         ~StartRender();
         //注册渲染输出函数
         void registerPaintImpl(RenderPaintInterface *paintImpl);
@@ -42,7 +40,7 @@ namespace render{
 
         float getFps();
 
-        Camera getCamera();
+        CameraController *getCamera();
 
 
         void setSize(int width,int height);
@@ -52,6 +50,8 @@ namespace render{
         void stop();
 
         Scene getScene();
+
+        ContextCache *const getContext();
 
     };
 };

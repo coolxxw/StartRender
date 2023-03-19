@@ -1,14 +1,14 @@
 #include <utility>
 #include <cassert>
 #include <fstream>
-#include "../engine/data/SceneData.h"
-#include "../include/Scene.h"
-#include "../math/Matrix.h"
+#include "../data/SceneData.h"
+#include "../../include/Scene.h"
+#include "../../math/Matrix.h"
 #include "ImageTool.h"
 
 using render_core::SceneData;
 using Buffer = render_core::SceneData::Buffer;
-using Texture = render_core::SceneData::Texture;
+using Texture = render_core::Texture;
 using Material = render_core::SceneData::Material;
 using Mesh = render_core::SceneData::Mesh;
 
@@ -330,4 +330,17 @@ void render::Scene::addSkyBoxImage(std::string file, render::Scene::SkyBoxDirect
 
 
 
+}
+
+bool render::Scene::bindEmissionTexture(Scene::MaterialId material, Scene::TextureId texture) {
+    assert(this->d!=nullptr);
+
+    if(material==0 ||material >= this->d->materials.size()){
+        return false;
+    }
+    if(texture >= this->d->textures.size()){
+        return false;
+    }
+    this->d->materials[material]->emissionTexture=texture;
+    return true;
 }

@@ -6,10 +6,11 @@
 #define STARTRENDER_VIEWING_H
 
 #include <cstdlib>
-#include "data/Camera.h"
+#include "../include/Camera.h"
 #include "../math/Matrix.h"
 
 namespace render_core{
+    using render::Camera;
 
 //裁剪空间
     class ClipSpace{
@@ -59,7 +60,7 @@ namespace render_core{
 
 
     public:
-        Viewing(const render_core::Camera &camera, ClipSpace clipSpace, int width, int height);
+        Viewing(const Camera &camera, ClipSpace clipSpace, int width, int height);
         Vector3f projection(Vector3f);
         Vector3f cameraTranform(Vector3f);
 

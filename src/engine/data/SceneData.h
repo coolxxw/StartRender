@@ -8,6 +8,7 @@
 #include <vector>
 
 #include "../../math/Matrix.h"
+#include "Texture.h"
 
 namespace render_core{
 
@@ -25,14 +26,10 @@ namespace render_core{
             unsigned int normalTexture=0;//texture id
             unsigned int baseColorTexture=0;//texture id
             unsigned int metallicRoughnessTexture=0;//texture id
+            unsigned int emissionTexture=0;
         };
 
-        struct Texture{
-            std::string name;
-            unsigned int width=0;
-            unsigned int height=0;
-            void* data=nullptr;//RGBA 表示
-        };
+
 
 
         struct Mesh{
