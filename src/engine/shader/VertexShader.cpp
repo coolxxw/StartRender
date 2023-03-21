@@ -98,7 +98,13 @@ VertexShader::vertexAttributeShading(unsigned int indicesCount, const unsigned i
     }else{
         for(int i=0;i<vertexCount;i++){
             attribute[i].u=uv[2*i];
+            while(attribute[i].u>=1.0f){
+                attribute[i].u-=1.0f;
+            }
             attribute[i].v=uv[2*i+1];
+            while(attribute[i].v>=1.0f){
+                attribute[i].v-=1.0f;
+            }
         }
     }
 

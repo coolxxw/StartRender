@@ -19,6 +19,7 @@ namespace render_core {
         unsigned height;
         Vector3f cameraGear;
         GBufferUnit* gBuffer;
+        GBufferCache* gBufferCache;
         const CubeMap *skybox;
         void *framebuffer;
         Environment environment;
@@ -43,6 +44,9 @@ namespace render_core {
 
 
         void shadingEmission() const;
+
+        void shadingZBuffer(float* zBuffer,unsigned int sampling);
+
     };
 } // render_core
 

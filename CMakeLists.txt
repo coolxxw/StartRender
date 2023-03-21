@@ -39,7 +39,7 @@ aux_source_directory(${PROJECT_SOURCE_DIR}/src/test TEST_SRC)
 SET (EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
 
 if(MSVC)
-    set(MY_VERSIONINFO_RC "${CMAKE_BINARY_DIR}/version.rc" src/engine/data/Texture.h)
+    set(MY_VERSIONINFO_RC "${CMAKE_BINARY_DIR}/version.rc" src/engine/data/Texture.h src/include/Config.h)
     configure_file("${PROJECT_SOURCE_DIR}/version.rc"
             "${MY_VERSIONINFO_RC}")
 endif()

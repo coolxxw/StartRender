@@ -12,15 +12,17 @@ namespace render_core {
     class RasterizationShader {
     public:
 
-        static void shading(
-                unsigned int width,
-                unsigned int heigth,
-                float* zbuffer,
-                const unsigned int *indices,
-                unsigned int indicesCount,
-                const Vector4f *vertex
-        );
+        unsigned int width;
+        unsigned int height;
+        float* zBuffer;
+        const unsigned int *indices;
+        unsigned int indicesCount;
+        const Vector4f *vertex;
 
+
+        void shading();
+
+        void shadingSimpling4();
     };
 
 } // render_core

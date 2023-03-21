@@ -247,6 +247,24 @@ void Gui::exec() {
                 ImGui::TreePop();//光照
             }
 
+            if(ImGui::TreeNode("图形")){
+                int antiAliasing=0;
+                if(context->config.antiAliasing==render::AntiAliasing::MSAAx4){
+                    antiAliasing=1;
+                }
+                if(ImGui::Combo("抗锯齿",&antiAliasing,"无\0SMAAx4")){
+                    if(antiAliasing==1){
+                        context->config.antiAliasing=render::AntiAliasing::MSAAx4;
+                    }else{
+                        context->config.antiAliasing=render::AntiAliasing::None;
+                    }
+
+                }
+
+                ImGui::TreePop();
+            }
+
+
             ImGui::End();
         } else {
 

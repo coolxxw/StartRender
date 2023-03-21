@@ -11,18 +11,26 @@
 #include "../data/TextureMap.h"
 #include "../data/VertexAttribute.h"
 #include "../data/Object.h"
+#include "../../include/Config.h"
 
 namespace render_core {
     class FragmentShader {
     public:
+        unsigned int width;
+        unsigned int height;
+        const float *zBuffer;;//输入zbuffer width*height
+        const Object* object;
+        GBufferUnit *gBuffer;//输出gbuffer width*height
+        GBufferCache* gBufferCache;
 
-        static void shading(
-                unsigned int width,
-                unsigned int height,
-                const float *zBuffer,//输入zbuffer width*height
-                const Object* object,
-                GBufferUnit *gBuffer//输出gbuffer width*height
-        );
+        render::AntiAliasing antiAliasing;//需要开始MSAA
+
+
+        void shading();
+
+    private:
+        void shadingNoAnti();
+        void shadingMSAAx4();
 
     };
 }

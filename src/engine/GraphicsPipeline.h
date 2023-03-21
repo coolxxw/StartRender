@@ -16,7 +16,7 @@ namespace render_core{
         Context *context;
         unsigned gBufferWidth=0;
         unsigned gBufferHeight=0;
-        GBufferUnit* gBuffer=nullptr;
+
 
         Vector3f sceneMin=Vector3f{0,0,0};
         Vector3f sceneMax=Vector3f{0,0,0};

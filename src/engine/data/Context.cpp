@@ -14,6 +14,7 @@ Context::Context() {
     zBuffer= nullptr;
     frameBuffer=nullptr;
     scene=new SceneData;
+
 }
 
 
@@ -25,6 +26,8 @@ Context::~Context() {
 
     delete zBuffer;
     delete frameBuffer;
+    delete gBuffer;
+    delete gBuffer;
     delete scene;
 }
 
@@ -36,9 +39,11 @@ void Context::update(const render::ContextCache* contextUpdate) {
 
         delete zBuffer;
         delete frameBuffer;
+        delete gBuffer;
 
 
         zBuffer=new float [width*height];
+        gBuffer=new GBufferUnit [width*height];
         frameBuffer=new RGBA[width * height];
 
     }
@@ -46,5 +51,16 @@ void Context::update(const render::ContextCache* contextUpdate) {
     camera=contextUpdate->camera;
     //光照
     light=contextUpdate->light;
+
+    if(config.antiAliasing!=contextUpdate->config.antiAliasing){
+        delete zBuffer;
+        if(contextUpdate->config.antiAliasing==render::AntiAliasing::MSAAx4){
+            zBuffer=new float [width*height*4];
+        }else{
+            zBuffer=new float [width*height];
+        }
+    }
+
+    config=contextUpdate->config;
 }
 

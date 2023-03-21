@@ -14,6 +14,7 @@
 #include "SceneData.h"
 #include "CubeMap.h"
 #include "../../include/ContextCache.h"
+#include "GBuffer.h"
 
 //渲染上下文
 
@@ -32,7 +33,11 @@ namespace render_core{
         std::vector<Object*> obj;
         CubeMap skybox;
         ClipSpace clipSpace;
+        //如果开启MSAA 大小为MSAA倍数
         float * zBuffer;
+        GBufferUnit* gBuffer=nullptr;
+        GBufferCache gBufferCache;
+        render::Config config;
 
 
     public:

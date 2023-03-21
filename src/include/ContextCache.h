@@ -7,6 +7,7 @@
 
 #include "Camera.h"
 #include "Environment.h"
+#include "Config.h"
 
 namespace render{
 
@@ -17,6 +18,7 @@ namespace render{
         int height=0;
         Environment light;
         Camera camera;
+        Config config;
     };
 
 }

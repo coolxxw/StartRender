@@ -23,7 +23,65 @@ namespace render_core{
         unsigned width;
         unsigned height;
 
-        RGBAF getAttribute(float u,float v)const{
+        inline RGBAF getAttribute2(float u,float v)const{
+            u=u*(float)(width-1)+0.5f;
+            v=v*(float)(height-1)+0.5f;
+
+            auto b= floor(u);
+            auto a= b-1.0f;
+            auto d= floor(v);
+            auto c= d-1.0f;
+
+            unsigned int y1=((int)d);
+            unsigned int x1=((int)b);
+            unsigned int y=(y1-1)%height;
+            unsigned int x=(x1-1)%width;
+
+            auto P1=texture[y*width+x];
+            auto P2=texture[y*width+x1];
+            auto P3=texture[y1*width+x];
+            auto P4=texture[y1*width+x1];
+
+            const static unsigned long ONE=0x00100;
+            const static auto ONEF=(float)ONE;
+            const static unsigned long ONE2=ONE*ONE;
+            const static auto ONE2F=(float)(ONE2*256);
+
+
+            //auto h2=(unsigned long)((u-a)*ONEF);
+            float bSubU=b-u+1.0f;
+            unsigned int floatInt=*(unsigned int*)&bSubU;
+            unsigned int h2,h1;
+            h1=(floatInt&(0x007FFFFF))>>15;
+            h2=h1^0xFF;
+
+            unsigned long r1=h1*P1.r+h2*P2.r;
+            unsigned long g1=h1*P1.g+h2*P2.g;
+            unsigned long b1=h1*P1.b+h2*P2.b;
+            unsigned long a1=h1*P1.a+h2*P2.a;
+
+            unsigned long r2=h1*P3.r+h2*P4.r;
+            unsigned long g2=h1*P3.g+h2*P4.g;
+            unsigned long b2=h1*P3.b+h2*P4.b;
+            unsigned long a2=h1*P3.a+h2*P4.a;
+
+            //h2=(unsigned long)((v-c)*ONEF);
+            float dSubV=d-v+1.0f;
+            floatInt=*(unsigned int*)&dSubV;
+            h1=(floatInt&(0x007FFFFF))>>15;
+            //h1=ONE-h2
+            h2=h1^0xFF;
+
+            r1=h1*r1+h2*r2;
+            g1=h1*g1+h2*g2;
+            b1=h1*b1+h2*b2;
+            a1=h1*a1+h2*a2;
+
+            return RGBAF(((float)r1)/ONE2F,((float)g1)/ONE2F,((float)b1)/ONE2F,((float)a1)/ONE2F);
+        }
+
+
+        inline RGBAF getAttribute(float u,float v)const{
             u=u*(float)width-0.5f;
             v=v*(float)height-0.5f;
 

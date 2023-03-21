@@ -35,9 +35,10 @@ SIMD优化
 PBR渲染,部分代码参考unity shader  
 加载gltf格式模型,仅支持部分功能  
 支持baseColor,normal,metallic,roughness,emission贴图
-支持简单CubeMap天空图
+支持简单CubeMap天空图  
+MSAAx4抗锯齿
 
 #### 待完善
 渲染颜色不准,Fresnel待修正  
 Mipmap,各项异性过滤  
-MSAA抗锯齿  
+ 

@@ -10,6 +10,11 @@
 void render_core::GraphicsPipeline::render() {
     prepare();
 
+    unsigned int sampling=1;
+    if(context->config.antiAliasing==render::AntiAliasing::MSAAx4){
+        sampling=4;
+    }
+
     int width=context->width;
     int height=context->height;
 
@@ -17,10 +22,11 @@ void render_core::GraphicsPipeline::render() {
     colorShader.width=width;
     colorShader.height=height;
     colorShader.framebuffer=context->frameBuffer;
-    colorShader.gBuffer=gBuffer;
+    colorShader.gBuffer=context->gBuffer;
     colorShader.environment=context->light;
     colorShader.cameraGear=context->camera.g;
     colorShader.skybox=&context->skybox;
+
 
     if (0&&this->context->obj.size()>=2){
 
@@ -45,7 +51,7 @@ void render_core::GraphicsPipeline::render() {
             Vector3f centor=(this->sceneMax+this->sceneMin)*0.5;
             float size= sqrt(v.x*v.x+v.y*v.y+v.z*v.z);
             {
-                float scale=1.5/size;
+                float scale=1.5f/size;
                 matrix.move(-centor);
                 matrix.scale(Vector3f(scale,scale,scale));
             }
@@ -63,19 +69,43 @@ void render_core::GraphicsPipeline::render() {
     }
 
     //光栅化+Z测试
+    RasterizationShader rasterizationShader;
+    rasterizationShader.width=width;
+    rasterizationShader.height=height;
+    rasterizationShader.zBuffer=context->zBuffer;
     for(int i=1;i<context->obj.size();i++){
         auto object=context->obj[i];
-        RasterizationShader::shading(width,height,context->zBuffer,object->indices,object->indicesCount,object->vertices);
+        rasterizationShader.indicesCount=object->indicesCount;
+        rasterizationShader.indices=object->indices;
+        rasterizationShader.vertex=object->vertices;
+
+        if(context->config.antiAliasing==render::AntiAliasing::MSAAx4){
+            rasterizationShader.shadingSimpling4();
+        }else{
+            rasterizationShader.shading();
+        }
+
     }
 
-    //Gbuffer
+    //片段作色 Gbuffer
+    FragmentShader fragmentShader;
+    fragmentShader.width=width;
+    fragmentShader.height=height;
+    fragmentShader.zBuffer=context->zBuffer;
+    fragmentShader.gBuffer=context->gBuffer;
+    fragmentShader.antiAliasing=context->config.antiAliasing;
+    context->gBufferCache.clear();
+    fragmentShader.gBufferCache=&context->gBufferCache;
+
     for(int i=1;i<context->obj.size();i++) {
         auto object = context->obj[i];
-        FragmentShader::shading(width, height, context->zBuffer, object,
-                                gBuffer);
+        fragmentShader.object=object;
+        fragmentShader.shading();
     }
 
+    colorShader.gBufferCache=&context->gBufferCache;
     colorShader.shading();
+    //colorShader.shadingZBuffer(context->zBuffer,sampling);
 
 
 
@@ -84,35 +114,17 @@ void render_core::GraphicsPipeline::render() {
 
 void render_core::GraphicsPipeline::prepare() {
 
-   //初始化framebuffer
-    {
-        RGBA* frameBuffer=context->frameBuffer;
-       // auto color=RGBA(127, 100, 50, 255);
-       // memset(frameBuffer,127,4*context->width*context->height);
-       // for(int i=0;i<(context->width*context->height);i++)
-        //{
-       //     //设置屏幕背景色
-       //     frameBuffer[i]=RGBA(127, 127, 127, 255);
-       // }
+    //初始化Z buffer
+    if(context->config.antiAliasing==render::AntiAliasing::MSAAx4){
+        memset(context->zBuffer,0,context->width*context->height*sizeof(float)*4);
+    }else{
+        memset(context->zBuffer,0,context->width*context->height*sizeof(float));
     }
 
-    //初始化Z buffer
-    memset(context->zBuffer,0,context->width*context->height*sizeof(float));
-    //for(int i=0;i<(context->width*context->height);i++)
-   // {
-    //    context->zBuffer[i]=0;//
-    //}
 
     //初始化G buffer
-    if(context->width*context->height!=0){
-        if(context->width!=gBufferWidth || context->height!=gBufferHeight){
-            delete[] gBuffer;
-            gBuffer=new GBufferUnit[context->height*context->width];
-            gBufferWidth=context->width;
-            gBufferHeight=context->height;
-        }
-        memset(gBuffer,0,sizeof(GBufferUnit)*gBufferWidth*gBufferHeight);
-    }
+    memset(context->gBuffer,0,sizeof(GBufferUnit)*context->width*context->height);
+
 
     //准备天空盒
     if(context->scene->skybox.back){
@@ -243,5 +255,5 @@ void render_core::GraphicsPipeline::prepare() {
 }
 
 render_core::GraphicsPipeline::~GraphicsPipeline() {
-    delete[] gBuffer;
+
 }

@@ -98,6 +98,11 @@ void ColorShader::shadingNormal() const {
     RGBA* frame=(RGBA*)framebuffer;
     for(int i=0;i<height;i++){
         for (int j=0;j<width;j++){
+            if(gBuffer[i*width+j].flag==GBufferFlag::Sampling){
+                frame[i*width+j]=RGBA(255,255,255,255);
+                continue;
+            }
+
             auto f= gBuffer[i*width+j].normal;
             RGBAF color=RGBAF(f.x,f.y,f.z);
             frame[i*width+j]=RGBA(color);
@@ -346,8 +351,24 @@ void ColorShader::shadingPbr() const {
     RGBA* frame=(RGBA*)framebuffer;
     for(int i=0;i<height;i++){
         for (int j=0;j<width;j++){
-            if(gBuffer[i*width+j].valid){
+            if(gBuffer[i*width+j].flag==GBufferFlag::Sampling){
                 frame[i*width+j]= pbr(env,gBuffer[i*width+j].normal, v, l, gBuffer[i*width+j].baseColor,gBuffer[i*width+j].emission, gBuffer[i*width+j].metallic, gBuffer[i * width + j].roughness, skybox);
+            }else if(gBuffer[i*width+j].flag==GBufferFlag::Sampling4){
+                auto index= gBuffer[i*width+j].index;
+                RGBA color[4];
+                int r=0,g=0,b=0;
+                for(int k=0;k<4;k++){
+                    if(index[k]==0){
+                        color[k]=RGBA(0,0,0,255);
+                        continue;
+                    }
+                    auto G=gBufferCache->get(index[k]);
+                    color[k]=pbr(env, G->normal, v, l, G->baseColor, G->emission, G->metallic, G->roughness, skybox);
+                    r+=(int)color[k].r;
+                    g+=(int)color[k].g;
+                    b+=(int)color[k].b;
+                }
+                frame[i*width+j]=RGBA(r/4,g/4,b/4,255);
             }
 
 
@@ -361,4 +382,30 @@ void ColorShader::shading() const{
     memset(framebuffer,127,width*height*4);
 
     shadingPbr();
+}
+
+void ColorShader::shadingZBuffer(float *zBuffer, unsigned int sampling) {
+    RGBA* frame=(RGBA*)framebuffer;
+    if(sampling==4){
+        for(int i=0;i<height  ;i++){
+            for (int j=0;j<width ;j++){
+                float z=0;
+                for(int k=0;k<4;k++){
+                    z+=zBuffer[4*(i*width+j)+k];
+                }
+                z/=4;
+
+                frame[i*width+j]=RGBA(RGBAF(z,z,z));
+            }
+        }
+    }else{
+        for(int i=0;i<height  ;i++){
+            for (int j=0;j<width ;j++){
+                float z=zBuffer[i*width+j];
+                frame[i*width+j]=RGBA(RGBAF(z,z,z));
+            }
+        }
+    }
+
+
 }
