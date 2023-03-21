@@ -34,7 +34,7 @@ SIMD优化
 视角移动   
 PBR渲染,部分代码参考unity shader  
 加载gltf格式模型,仅支持部分功能  
-支持baseColor,normal,metallic,roughness,emission贴图
+支持baseColor,normal,metallic,roughness,emission贴图  
 支持简单CubeMap天空图  
 MSAAx4抗锯齿
 
