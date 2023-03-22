@@ -5,9 +5,9 @@
   
 
 #### 渲染图示例
-![](Screenshot-small.png)  
+![](screenshot-small.png)  
 
-[查看大图](Screenshot.png)
+[查看大图](screenshot.png)
 
 #### 使用方法
 拖动gltf格式文件到窗口  
