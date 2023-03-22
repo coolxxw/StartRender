@@ -1,3 +1,5 @@
+#pragma comment( linker, "/subsystem:windows /entry:mainCRTStartup" )
+
 //内存泄漏检测
 #ifdef _DEBUG
 #include <vld.h>
