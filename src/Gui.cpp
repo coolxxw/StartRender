@@ -1,5 +1,3 @@
-//
-// Created by xxw on 2023/2/20.
 #include <fstream>
 
 
@@ -9,6 +7,8 @@
 #include "imgui_impl_sdlrenderer.h"
 #include <cstdio>
 #include <SDL.h>
+#include <sstream>
+
 #if !SDL_VERSION_ATLEAST(2,0,17)
 #error This backend requires SDL 2.0.17+ because of SDL_RenderGeometry() function
 #endif
@@ -16,14 +16,20 @@
 
 
 #include "Gui.h"
-#include "./include/Util.h"
 #include "include/GltfFile.h"
+#include "front.jpg.h"
+#include "back.jpg.h"
+#include "left.jpg.h"
+#include "right.jpg.h"
+#include "top.jpg.h"
+#include "bottom.jpg.h"
+#include "chinese.txt.h"
 
 
 class GuiData{
 public:
     SDL_Texture *sdl_texture= nullptr;
-    SDL_Renderer* renderer;
+    SDL_Renderer* renderer= nullptr;
 };
 
 Gui::Gui() {
@@ -32,6 +38,7 @@ Gui::Gui() {
 }
 
 void Gui::exec() {
+
 
     //以下部分照搬官方源码
 // Setup SDL
@@ -47,10 +54,10 @@ void Gui::exec() {
 #endif
 
     // Create window with SDL_Renderer graphics context
-    SDL_WindowFlags window_flags = (SDL_WindowFlags)(SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI);
-    SDL_Window* window = SDL_CreateWindow("StartRender", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1024, 1024, window_flags);
+    auto window_flags = (SDL_WindowFlags)(SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI);
+    SDL_Window* window = SDL_CreateWindow("StartRender", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 512, 512, window_flags);
     SDL_Renderer* renderer = SDL_CreateRenderer(window, -1,  SDL_RENDERER_SOFTWARE);
-    if (renderer == NULL)
+    if (renderer == nullptr)
     {
         SDL_Log("Error creating SDL_Renderer!");
         return ;
@@ -70,19 +77,11 @@ void Gui::exec() {
     ImGui_ImplSDLRenderer_Init(renderer);
 
 
-    // Our state
-    bool show_demo_window = true;
-    bool show_another_window = false;
-    ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
-
-    // Main loop
-    bool done = false;
-
-
     //加载汉字字符表
     std::fstream file;
     ImVector<ImWchar> chineseRange;
     ImFontGlyphRangesBuilder chineseGlyph;
+    /*
     file.open("assets/chinese.txt",std::ios_base::in);
     if(file.is_open()){
         while(!file.eof()){
@@ -91,6 +90,10 @@ void Gui::exec() {
             chineseGlyph.AddText(s.c_str());
         }
     }
+     */
+
+    chineseGlyph.AddText(reinterpret_cast<const char *>(R_CHINESE_TXT_DATA));
+
     //添加ASCII
     for(int i=0x20;i<=0xFF;i++){
         char e[]={(char)i,0};
@@ -99,37 +102,31 @@ void Gui::exec() {
     chineseGlyph.BuildRanges(&chineseRange);
 
     //加载字体 Windows 微软雅黑
-    ImFont* font=io.Fonts->AddFontFromFileTTF("C:/Windows/Fonts/simhei.ttf",18.0f,NULL,chineseRange.Data);
+    ImFont* font=ImGui::GetIO().Fonts->AddFontFromFileTTF("C:/Windows/Fonts/simhei.ttf",18.0f,NULL,chineseRange.Data);
     if(!font){
-        io.Fonts->AddFontFromFileTTF("assets/fonts/LXGWWenKai-Regular.ttf",18.0f,NULL,chineseRange.Data);
+        ImGui::GetIO().Fonts->AddFontFromFileTTF("assets/fonts/LXGWWenKai-Regular.ttf",18.0f,NULL,chineseRange.Data);
     }
     //完成加载汉字字符表
 
+
+
+
+
+    // Main loop
+    bool done = false;
+
     //设置下渲染引擎
     render->registerPaintImpl(this);
-    auto scene=render->getScene();
-    //加载天空盒
-    scene.addSkyBoxImage("./assets/skybox/front.jpg",render::Scene::SkyBoxDirection::Front);
-    scene.addSkyBoxImage("./assets/skybox/back.jpg",render::Scene::SkyBoxDirection::Back);
-    scene.addSkyBoxImage("./assets/skybox/top.jpg",render::Scene::SkyBoxDirection::Top);
-    scene.addSkyBoxImage("./assets/skybox/bottom.jpg",render::Scene::SkyBoxDirection::Bottom);
-    scene.addSkyBoxImage("./assets/skybox/left.jpg",render::Scene::SkyBoxDirection::Left);
-    scene.addSkyBoxImage("./assets/skybox/right.jpg",render::Scene::SkyBoxDirection::Right);
-    //加载模型
-    //GltfFile *gltfFile=new GltfFile("D:/IT/git/glTF-Sample-Models-master/2.0/BoomBoxWithAxes/glTF/BoomBoxWithAxes.gltf");
-    //GltfFile *gltfFile=new GltfFile("D:/IT/git/glTF-Sample-Models-master/2.0/MetalRoughSpheres/glTF/MetalRoughSpheres.gltf");
-   // GltfFile *gltfFile=new GltfFile("bee.glb");
-   // GltfFile *gltfFile=new GltfFile("D:/IT/git/glTF-Sample-Models-master/2.0/NormalTangentTest/glTF/NormalTangentTest.gltf");
-     GltfFile *gltfFile=new GltfFile(R"(D:\IT\git\glTF-Sample-Models-master\2.0\DamagedHelmet\glTF\DamagedHelmet.gltf)");
-    gltfFile->fillScene(&scene);
-    delete gltfFile;
+    //加载配置文件 加载模型文件
+    loadProfile();
+
+    //启动渲染引擎
     render->start();
     this->d->renderer=renderer;
 
 
-
     const unsigned int FPS=1000/60;//20可替换为限制的帧速
-    Uint32 _FPS_Timer=0;
+    Uint32 FPS_Timer=0;
     float guiAlpha=0.5;//gui透明度
 
     // Main loop
@@ -143,12 +140,19 @@ void Gui::exec() {
             if (event.type == SDL_WINDOWEVENT && event.window.event == SDL_WINDOWEVENT_CLOSE &&
                 event.window.windowID == SDL_GetWindowID(window))
                 done = true;
+            if (event.type==SDL_DROPFILE){
+                const char *file=event.drop.file;
+                if(file!= nullptr){
+                    profile.file=file;
+                    loadFile(file);
+                }
+            }
         }
         //限制帧率
-        if(SDL_GetTicks()-_FPS_Timer<FPS){
-            SDL_Delay(FPS-SDL_GetTicks()+_FPS_Timer);
+        if(SDL_GetTicks()-FPS_Timer<FPS){
+            SDL_Delay(FPS-SDL_GetTicks()+FPS_Timer);
         }
-        _FPS_Timer=SDL_GetTicks();
+        FPS_Timer=SDL_GetTicks();
 
         // Start the Dear ImGui frame
         ImGui_ImplSDLRenderer_NewFrame();
@@ -158,17 +162,20 @@ void Gui::exec() {
 
 
         //以下部分是Gui控件代码
+
+        //设置透明度
         ImGui::SetNextWindowBgAlpha(guiAlpha);
+        //获取窗口大小
         int display_w =(int)ImGui::GetIO().DisplaySize.x;
         int display_h=(int)ImGui::GetIO().DisplaySize.y;
-
         render->setSize(display_w,display_h);
 
 
-
+        //检测按键
         if(ImGui::IsKeyPressed(ImGuiKey_F1)){
             this->showController=!this->showController;
         }
+        //if(ImGui::)
 
 
 
@@ -248,6 +255,12 @@ void Gui::exec() {
             }
 
             if(ImGui::TreeNode("图形")){
+                //分别率设置
+                if(ImGui::Button("设置为分辨率1024x1024")){
+                    SDL_SetWindowSize(window,1024,1024);
+                }
+
+                //MSAA设置
                 int antiAliasing=0;
                 if(context->config.antiAliasing==render::AntiAliasing::MSAAx4){
                     antiAliasing=1;
@@ -267,6 +280,7 @@ void Gui::exec() {
 
             ImGui::End();
         } else {
+            //处理视角移动
 
             if (ImGui::IsMouseDown(ImGuiMouseButton_Left)) {
                 render::CameraController *camera = render->getCamera();
@@ -308,6 +322,8 @@ void Gui::exec() {
 
     }//while
 
+    render->stop();
+    saveProfile();
 
     // Cleanup
     ImGui_ImplSDLRenderer_Shutdown();
@@ -333,7 +349,7 @@ void Gui::paint(void *buffer, int width, int height) {
     }
     frameBufferLock.inLock();
     if(frameBuffer_w!=width || frameBuffer_h!=height){
-        delete frameBuffer;
+        delete[] (char*)frameBuffer;
        frameBuffer=new char[width*height*4];
     }
     memmove(frameBuffer,buffer,width*height*4);
@@ -360,4 +376,83 @@ void Gui::mousePosCallback(float x, float y) {
         this->mouseMoveX=x;
         this->mouseMoveY=y;
     }
+}
+
+//加载字体 加载配置文件
+void Gui::loadProfile() {
+
+
+    //加载配置文件
+    std::ifstream profileFStream;
+    profileFStream.open("StartRender.ini",std::ios::in);
+    std::string line;
+    while(profileFStream>>line){
+        setProfile(line);
+    }
+    profileFStream.close();
+
+
+
+    //加载天空盒
+   // render->addSkyBoxImage("./assets/skybox/front.jpg","front");
+   // render->addSkyBoxImage("./assets/skybox/back.jpg","back");
+   // render->addSkyBoxImage("./assets/skybox/top.jpg","top");
+   // render->addSkyBoxImage("./assets/skybox/bottom.jpg","bottom");
+   // render->addSkyBoxImage("./assets/skybox/left.jpg","left");
+   // render->addSkyBoxImage("./assets/skybox/right.jpg","right");
+    render->addSkyBoxImage((const void*)R_FRONT_JPG_DATA,R_FRONT_JPG_SIZE-1,"front");
+    render->addSkyBoxImage((const void*)R_BACK_JPG_DATA,R_BACK_JPG_SIZE-1,"back");
+    render->addSkyBoxImage((const void*)R_LEFT_JPG_DATA,R_LEFT_JPG_SIZE-1,"left");
+    render->addSkyBoxImage((const void*)R_RIGHT_JPG_DATA,R_RIGHT_JPG_SIZE-1,"right");
+    render->addSkyBoxImage((const void*)R_TOP_JPG_DATA,R_TOP_JPG_SIZE-1,"top");
+    render->addSkyBoxImage((const void*)R_BOTTOM_JPG_DATA,R_BOTTOM_JPG_SIZE-1,"bottom");
+
+
+    loadFile(profile.file);
+
+}
+
+void Gui::saveProfile() {
+    std::ofstream profileFStream;
+    profileFStream.open("StartRender.ini",std::ios::out);
+    if(!profile.file.empty()){
+        profileFStream<<"File="<<profile.file<<std::endl;
+    }
+    profileFStream.close();
+}
+
+static void _split(const std::string &s, char delim,
+                   std::vector<std::string> &elems) {
+    std::stringstream ss(s);
+    std::string item;
+
+    while (std::getline(ss, item, delim)) {
+        elems.push_back(item);
+    }
+}
+
+std::vector<std::string> split(const std::string &s, char delim) {
+    std::vector<std::string> elems;
+    _split(s, delim, elems);
+    return elems;
+}
+
+void Gui::setProfile(std::string line) {
+    auto kv=split(line,'=');
+    if(kv.size()>=2){
+        if(kv[0]=="File"){
+            this->profile.file=kv[1];
+        }
+    }
+}
+
+void Gui::loadFile(std::string file) {
+//加载模型
+    auto scene=render::Scene();
+    if(!this->profile.file.empty()){
+        auto *gltfFile=new GltfFile(file);
+        gltfFile->fillScene(&scene);
+        delete gltfFile;
+    }
+    render->setScene(scene);
 }

@@ -24,9 +24,12 @@ RenderEngine::RenderEngine() {
     thread=0;
     threadExitFlag=false;
     paintImpl= nullptr;
+    eventQueue=new std::queue<render::Event*>;
     context = new Context();
+    contextUpdate= new ContextUpdate;
     contextCacheAlloc= new ContextCacheAlloc();
     createContentCache(context,&contextCacheAlloc->contextCache);
+    context->updateSkyboxMap();
     renderFrame = new GraphicsPipeline(context);
     //eventManager=new EventManager(context);
 }
@@ -39,13 +42,15 @@ RenderEngine::~RenderEngine() {
     //delete eventManager;
     delete context;
     delete contextCacheAlloc;
+    delete contextUpdate;
+    delete eventQueue;
 }
 
 void RenderEngine::setMaxFPS(float newFps) {
     this->fps=newFps;
 }
 
-static DWORD WINAPI ThreadProc(
+static DWORD WINAPI StartRenderThreadProc(
         _In_ LPVOID lpParameter
 ){
     auto* obj= (RenderEngine*)lpParameter;
@@ -57,7 +62,7 @@ void RenderEngine::startRender() {
         return;
     }
     threadExitFlag=false;
-    thread=::CreateThread(nullptr,0,ThreadProc,this,0,0);
+    thread= ::CreateThread(nullptr, 0, StartRenderThreadProc, this, 0, 0);
 }
 
 void RenderEngine::stopRender() {
@@ -72,7 +77,8 @@ int RenderEngine::renderThread() {
     while(!threadExitFlag){
 
         //处理事件
-        context->update(&contextCacheAlloc->contextCache);
+        context->update(contextUpdate,&contextCacheAlloc->contextCache);
+        eventHandler();
        // eventManager->disposalAllEvent();
 
         //限制帧率
@@ -130,6 +136,65 @@ void render_core::RenderEngine::createContentCache(const Context *context1, rend
 
 render::ContextCache *RenderEngine::getContextCache(){
     return &contextCacheAlloc->contextCache;
+}
+
+void render_core::RenderEngine::eventHandler() {
+    eventQueueLock.lock();
+    auto queue=eventQueue;
+    eventQueue=new std::queue<render::Event*>;
+    eventQueueLock.unlock();
+    while(!queue->empty()){
+        auto e=queue->front();
+        queue->pop();
+        switch(e->type){
+
+            case render::Event::UpdateSkybox:
+            {
+                auto *e2= dynamic_cast<render::UpdateSkyBoxEvent *>(e);
+                Texture *texture;
+                switch (e2->direction) {
+                    case render::UpdateSkyBoxEvent::Left:
+                        texture = &context->skyboxTexture.left;
+                        break;
+                    case render::UpdateSkyBoxEvent::Right:
+                        texture = &context->skyboxTexture.right;
+                        break;
+                    case render::UpdateSkyBoxEvent::Top:
+                        texture = &context->skyboxTexture.top;
+                        break;
+                    case render::UpdateSkyBoxEvent::Bottom:
+                        texture = &context->skyboxTexture.bottom;
+                        break;
+                    case render::UpdateSkyBoxEvent::Front:
+                        texture = &context->skyboxTexture.front;
+                        break;
+                    case render::UpdateSkyBoxEvent::Back:
+                        texture = &context->skyboxTexture.back;
+                        break;
+                }
+                delete[] (char*)texture->data;
+                texture->data=e2->data;
+                texture->width=e2->width;
+                texture->height=e2->height;
+                context->updateSkyboxMap();
+                delete e2;
+            }
+            break;
+
+        }
+
+        //delete (render::Event*)e;
+    }
+
+    delete queue;
+
+
+}
+
+void render_core::RenderEngine::postEvent(render::Event* e) {
+    eventQueueLock.lock();
+    eventQueue->push(e);
+    eventQueueLock.unlock();
 }
 
 

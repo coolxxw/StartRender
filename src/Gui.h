@@ -52,6 +52,10 @@ public:
 
 class GuiData;
 
+struct Profile{
+    std::string file;
+};
+
 class Gui : render::RenderPaintInterface{
 private:
     GuiData* d;
@@ -64,6 +68,7 @@ private:
     bool mouseMoveFlag=false;
     float mouseMoveX=0;
     float mouseMoveY=0;
+    Profile profile;
 
 
 
@@ -80,6 +85,11 @@ public:
 
 private:
     void paint(void *frameBuffer,int width,int height) override;
+
+    void loadProfile();
+    void setProfile(std::string line);
+    void saveProfile();
+    void loadFile(std::string file);
 
 };
 

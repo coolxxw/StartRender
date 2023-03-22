@@ -42,15 +42,6 @@ namespace render_core{
             Matrix4f matrix;
         };
 
-        struct Skybox{
-            //索引Texture
-            unsigned int top=0;
-            unsigned int left=0;
-            unsigned int right=0;
-            unsigned int bottom=0;
-            unsigned int front=0;
-            unsigned int back=0;
-        };
 
     public:
         std::string name;//场景名
@@ -58,7 +49,6 @@ namespace render_core{
         std::vector<Texture*> textures;
         std::vector<Material*> materials;
         std::vector<Mesh> meshes;
-        Skybox skybox;
 
         SceneData(){
             buffers.resize(1);

@@ -4,9 +4,9 @@
 
 #ifndef STARTRENDER_SCENE_H
 #define STARTRENDER_SCENE_H
+
 #include <string>
 #include <vector>
-#include "Camera.h"
 #include "../math/Matrix.h"
 
 namespace render_core{
@@ -18,22 +18,17 @@ namespace render{
     class Scene {
 
     public:
-        enum SkyBoxDirection{
-            Top,
-            Left,
-            Right,
-            Bottom,
-            Front,
-            Back,
 
-        };
 
         typedef unsigned int TextureId;
         typedef unsigned int BufferId;
         typedef unsigned int MaterialId;
         typedef unsigned int MeshId;
 
+
+
     private:
+
         render_core::SceneData* d= nullptr;
 
         bool checkUvTexture(BufferId vertex,BufferId uv);
@@ -41,7 +36,10 @@ namespace render{
         bool checkVertex(BufferId indices,BufferId vertex);
 
     public:
-        explicit Scene(render_core::SceneData* sceneData):d(sceneData){};
+        explicit Scene();
+        ~Scene();
+
+        render_core::SceneData* moveSceneData();
 
         TextureId addTextureRGBA(std::string name,const void* data, unsigned int w, unsigned int h);
 
@@ -94,8 +92,6 @@ namespace render{
         bool bindMetallicRoughnessTexture(MaterialId material,TextureId texture);
 
         bool translationMesh(MeshId meshId,Matrix4f matrix);
-
-        void addSkyBoxImage(std::string file,SkyBoxDirection);
 
         bool bindEmissionTexture(MaterialId material, TextureId emission);
     };

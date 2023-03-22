@@ -6,7 +6,7 @@
 #define STARTRENDER_UTIL_H
 
 
-
+#include <atomic>
 #include "../math/Vector.h"
 #include "../engine/platform/SIMDUtil.h"
 
@@ -159,6 +159,30 @@ public:
 
 
 };
+
+namespace render{
+
+    class CAS{
+        std::atomic<bool> flag;
+
+
+
+    public:
+        void lock(){
+            bool expect = false;
+            while (!flag.compare_exchange_strong(expect, true))
+            {
+                expect = false;
+            }
+        }
+
+        void unlock(){
+            flag.store(false);
+        }
+    };
+
+
+}
 
 
 #endif //STARTRENDER_UTIL_H

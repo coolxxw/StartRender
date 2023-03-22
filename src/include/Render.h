@@ -1,6 +1,3 @@
-//
-// Created by xxw on 2023/2/10.
-//
 
 #ifndef STARTRENDER_RENDER_H
 #define STARTRENDER_RENDER_H
@@ -36,11 +33,11 @@ namespace render{
         //注册渲染输出函数
         void registerPaintImpl(RenderPaintInterface *paintImpl);
 
-        long long getFrameCounter();
+        long long getFrameCounter() const;
 
-        float getFps();
+        float getFps() const;
 
-        CameraController *getCamera();
+        CameraController *getCamera() const;
 
 
         void setSize(int width,int height);
@@ -49,9 +46,12 @@ namespace render{
 
         void stop();
 
-        Scene getScene();
+        void setScene(render::Scene& scene);
 
-        ContextCache *const getContext();
+        void addSkyBoxImage(std::string file,std::string direct);
+        void addSkyBoxImage(const void* data,unsigned int dataLenght,std::string direct);
+
+        ContextCache *getContext();
 
     };
 };

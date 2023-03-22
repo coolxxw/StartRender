@@ -295,42 +295,6 @@ bool render::Scene::translationMesh(render::Scene::MeshId meshId, Matrix4f matri
     return true;
 }
 
-void render::Scene::addSkyBoxImage(std::string file, render::Scene::SkyBoxDirection direction) {
-    unsigned int width,height;
-    auto data=ImageTool::imageToRGBA(file,&width,&height);
-    if(data== nullptr){
-        return;
-    }
-    auto index= this->addTextureRGBA("",data,width,height);
-
-    switch(direction){
-
-
-        case Top:
-            d->skybox.top=index;
-            break;
-        case Left:
-            d->skybox.left=index;
-            break;
-        case Right:
-            d->skybox.right=index;
-            break;
-        case Bottom:
-            d->skybox.bottom=index;
-            break;
-        case Front:
-            d->skybox.front=index;
-            break;
-        case Back:
-            d->skybox.back=index;
-            break;
-    }
-
-
-
-
-
-}
 
 bool render::Scene::bindEmissionTexture(Scene::MaterialId material, Scene::TextureId texture) {
     assert(this->d!=nullptr);
@@ -343,4 +307,19 @@ bool render::Scene::bindEmissionTexture(Scene::MaterialId material, Scene::Textu
     }
     this->d->materials[material]->emissionTexture=texture;
     return true;
+}
+
+render_core::SceneData *render::Scene::moveSceneData() {
+    auto r=d;
+    d=new SceneData;
+
+    return r;
+
+}
+
+render::Scene::Scene():d(new SceneData) {
+}
+
+render::Scene::~Scene() {
+    delete d;
 }

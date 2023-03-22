@@ -20,6 +20,33 @@
 
 namespace render_core{
 
+    struct SkyBox{
+        Texture right;
+        Texture top;
+        Texture bottom;
+        Texture front;
+        Texture back;
+
+    public:
+//索引Texture
+Texture left;
+    };
+
+    class ContextUpdate{
+    public:
+        SceneData* sceneData=nullptr;
+        bool updateScene=false;
+    };
+
+    class SceneParam{
+    public:
+        //记录场景中物体的大小
+        Vector3f sceneMin=Vector3f{0,0,0};
+        Vector3f sceneMax=Vector3f{0,0,0};
+    };
+
+
+
 
     //渲染上下文
     class Context {
@@ -31,20 +58,26 @@ namespace render_core{
         render::Environment light;
         SceneData *scene;
         std::vector<Object*> obj;
+        SceneParam sceneParam;
+        SkyBox skyboxTexture;
         CubeMap skybox;
         ClipSpace clipSpace;
         //如果开启MSAA 大小为MSAA倍数
         float * zBuffer;
         GBufferUnit* gBuffer=nullptr;
         GBufferCache gBufferCache;
-        render::Config config;
+        render::Config config{};
+
 
 
     public:
         Context();
         ~Context();
 
-        void update(const render::ContextCache* contextUpdate);
+        void update(ContextUpdate* contextUpdate,const render::ContextCache* contextCache);
+
+        void updateObject();
+        void updateSkyboxMap();
 
     };
 

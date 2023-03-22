@@ -352,14 +352,19 @@ void ColorShader::shadingPbr() const {
     for(int i=0;i<height;i++){
         for (int j=0;j<width;j++){
             if(gBuffer[i*width+j].flag==GBufferFlag::Sampling){
+                //单倍着色
                 frame[i*width+j]= pbr(env,gBuffer[i*width+j].normal, v, l, gBuffer[i*width+j].baseColor,gBuffer[i*width+j].emission, gBuffer[i*width+j].metallic, gBuffer[i * width + j].roughness, skybox);
             }else if(gBuffer[i*width+j].flag==GBufferFlag::Sampling4){
+                //四倍着色
                 auto index= gBuffer[i*width+j].index;
                 RGBA color[4];
                 int r=0,g=0,b=0;
                 for(int k=0;k<4;k++){
                     if(index[k]==0){
-                        color[k]=RGBA(0,0,0,255);
+                        color[k]=frame[i*width+j];
+                        r+=(int)color[k].r;
+                        g+=(int)color[k].g;
+                        b+=(int)color[k].b;
                         continue;
                     }
                     auto G=gBufferCache->get(index[k]);
@@ -386,7 +391,9 @@ void ColorShader::shading() const{
 
 void ColorShader::shadingZBuffer(float *zBuffer, unsigned int sampling) {
     RGBA* frame=(RGBA*)framebuffer;
+
     if(sampling==4){
+
         for(int i=0;i<height  ;i++){
             for (int j=0;j<width ;j++){
                 float z=0;

@@ -5,12 +5,15 @@
 #ifndef STARTRENDER_RENDERENGINE_H
 #define STARTRENDER_RENDERENGINE_H
 
+#include <queue>
 #include "../include/type.h"
 #include "data/Context.h"
 #include "../include/Camera.h"
 #include "../include/Render.h"
 #include "../include/ContextCache.h"
 #include "GraphicsPipeline.h"
+#include "../include/Event.h"
+
 
 namespace render_core{
 
@@ -35,11 +38,15 @@ namespace render_core{
 
         Context *context;
         ContextCacheAlloc *contextCacheAlloc;
+        ContextUpdate* contextUpdate;
 
         GraphicsPipeline *renderFrame;
         //EventManager *eventManager;
 
         friend class RenderEvent;
+
+        std::queue<render::Event*>* eventQueue;
+        render::CAS eventQueueLock;
 
 
         render::ContextCache *getContextCache();
@@ -57,6 +64,8 @@ namespace render_core{
 
         long long getFrameCounter() const;
 
+        void postEvent(render::Event *event);
+
         //启动渲染线程
         void startRender();
         //停止渲染
@@ -64,9 +73,12 @@ namespace render_core{
 
         int renderThread();
 
+
     private:
 
         static void createContentCache(const Context* context1,render::ContextCache* cache);
+
+        void eventHandler();
 
 
     };

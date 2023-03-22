@@ -6,14 +6,15 @@
 #include "RenderEngine.h"
 #include "../engine/platform/SIMDUtil.h"
 #include "../include/ContextCache.h"
+#include "render/ImageTool.h"
 
-using  render::StartRender;
+using render::StartRender;
 using namespace render_core;
 using render::Camera;
 
 
 StartRender::StartRender() {
-    engine=new RenderEngine();
+    engine = new RenderEngine();
 }
 
 StartRender::~StartRender() {
@@ -29,35 +30,91 @@ void StartRender::stop() {
 }
 
 void StartRender::registerPaintImpl(RenderPaintInterface *paintImpl) {
-    {engine->paintImpl=paintImpl;}
+    { engine->paintImpl = paintImpl; }
 }
-
 
 
 void StartRender::setSize(int width, int height) {
-    engine->contextCacheAlloc->contextCache.width=width;
-    engine->contextCacheAlloc->contextCache.height=height;
+    engine->contextCacheAlloc->contextCache.width = width;
+    engine->contextCacheAlloc->contextCache.height = height;
 }
 
-long long render::StartRender::getFrameCounter() {
+long long render::StartRender::getFrameCounter() const {
     return engine->getFrameCounter();
 }
 
-float render::StartRender::getFps() {
+float render::StartRender::getFps() const {
     return engine->getFps();
 }
 
 
-render::Scene render::StartRender::getScene() {
-    return Scene((SceneData*)engine->context->scene);
+render::CameraController *render::StartRender::getCamera() const {
+    return (CameraController *) &engine->getContextCache()->camera;
 }
 
-render::CameraController *render::StartRender::getCamera() {
-    return (CameraController*)&engine->getContextCache()->camera;
-}
-
-render::ContextCache* const render::StartRender::getContext() {
+render::ContextCache *render::StartRender::getContext() {
     return engine->getContextCache();
+}
+
+void render::StartRender::setScene(render::Scene &scene) {
+    engine->contextUpdate->sceneData = scene.moveSceneData();
+    engine->contextUpdate->updateScene = true;
+}
+
+void render::StartRender::addSkyBoxImage(std::string file, std::string direct) {
+
+    unsigned int width, height;
+    auto data = ImageTool::imageToRGBA(file, &width, &height);
+    if (data == nullptr) {
+        return;
+    }
+
+    UpdateSkyBoxEvent* event;
+    UpdateSkyBoxEvent::Direction direction;
+
+    if (direct == "left") {
+        direction=UpdateSkyBoxEvent::Direction::Left;
+    } else if (direct == "right") {
+        direction=UpdateSkyBoxEvent::Direction::Right;
+    } else if (direct == "top") {
+        direction=UpdateSkyBoxEvent::Direction::Top;
+    } else if (direct == "bottom") {
+        direction=UpdateSkyBoxEvent::Direction::Bottom;
+    } else if (direct == "front") {
+        direction=UpdateSkyBoxEvent::Direction::Front;
+    } else if (direct == "back") {
+        direction=UpdateSkyBoxEvent::Direction::Back;
+    }
+    event=new UpdateSkyBoxEvent(direction,height,width,data);
+    engine->postEvent(event);
+
+}
+
+void render::StartRender::addSkyBoxImage(const void *d, unsigned int dataLenght, std::string direct) {
+    unsigned int width, height;
+    auto data = ImageTool::imageToRGBA(d,dataLenght, &width, &height);
+    if (data == nullptr) {
+        return;
+    }
+
+    UpdateSkyBoxEvent* event;
+    UpdateSkyBoxEvent::Direction direction;
+
+    if (direct == "left") {
+        direction=UpdateSkyBoxEvent::Direction::Left;
+    } else if (direct == "right") {
+        direction=UpdateSkyBoxEvent::Direction::Right;
+    } else if (direct == "top") {
+        direction=UpdateSkyBoxEvent::Direction::Top;
+    } else if (direct == "bottom") {
+        direction=UpdateSkyBoxEvent::Direction::Bottom;
+    } else if (direct == "front") {
+        direction=UpdateSkyBoxEvent::Direction::Front;
+    } else if (direct == "back") {
+        direction=UpdateSkyBoxEvent::Direction::Back;
+    }
+    event=new UpdateSkyBoxEvent(direction,height,width,data);
+    engine->postEvent(event);
 }
 
 

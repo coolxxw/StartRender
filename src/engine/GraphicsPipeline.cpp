@@ -47,8 +47,10 @@ void render_core::GraphicsPipeline::render() {
         Matrix4f matrix;
 
         if(1){
-            Vector3f v=this->sceneMax-this->sceneMin;
-            Vector3f centor=(this->sceneMax+this->sceneMin)*0.5;
+            auto &sceneMax=context->sceneParam.sceneMax;
+            auto &sceneMin=context->sceneParam.sceneMin;
+            Vector3f v=sceneMax-sceneMin;
+            Vector3f centor=(sceneMax+sceneMin)*0.5;
             float size= sqrt(v.x*v.x+v.y*v.y+v.z*v.z);
             {
                 float scale=1.5f/size;
@@ -126,132 +128,9 @@ void render_core::GraphicsPipeline::prepare() {
     memset(context->gBuffer,0,sizeof(GBufferUnit)*context->width*context->height);
 
 
-    //准备天空盒
-    if(context->scene->skybox.back){
-        context->skybox.back=TextureMap( context->scene->textures[context->scene->skybox.back]);
-    }
-    //准备天空盒
-    if(context->scene->skybox.left){
-        context->skybox.left=TextureMap( context->scene->textures[context->scene->skybox.left]);
-    }
-    //准备天空盒
-    if(context->scene->skybox.right){
-        context->skybox.right=TextureMap( context->scene->textures[context->scene->skybox.right]);
-    }
-    //准备天空盒
-    if(context->scene->skybox.top){
-        context->skybox.top=TextureMap( context->scene->textures[context->scene->skybox.top]);
-    }
-    //准备天空盒
-    if(context->scene->skybox.bottom){
-        context->skybox.bottom=TextureMap( context->scene->textures[context->scene->skybox.bottom]);
-    }
-    //准备天空盒
-    if(context->scene->skybox.front){
-        context->skybox.front=TextureMap( context->scene->textures[context->scene->skybox.front]);
-    }
-
-
-    //准备Object List
-    if(context->obj.empty()){
-        context->obj.resize(1);
-    }
-    auto scene=context->scene;
-    for(int i=1;i<scene->meshes.size();i++){
-
-        if(i>=context->obj.size()){
-
-            auto mesh=scene->meshes[i];
-            auto vertex= scene->buffers[mesh.vertex];
-            auto o=new Object(vertex.length/(sizeof(Vector4f)));
-            context->obj.push_back(o);
-
-            o->matrix=mesh.matrix;
-            if(mesh.indices==0){
-                continue;
-            }
-            o->indicesCount=scene->buffers[mesh.indices].length/4;
-            o->indices= (unsigned int*)scene->buffers[mesh.indices].data;
-            if(mesh.vertex==0){
-                continue;
-            }
-            if(mesh.uv!=0){
-                o->uvTexture=(float*)scene->buffers[mesh.uv].data;
-            }
-            if(mesh.normal!=0){
-                o->normal= (Vector3f *)( scene->buffers[mesh.normal].data);
-            }
-            o->preVertices=(Vector4f*)scene->buffers[mesh.vertex].data;
-
-
-            auto material=scene->materials[mesh.material];
-
-            //准备法线贴图
-            if( material ==nullptr || material->normalTexture==0){
-                o->normalTexture=TextureMap(Texture::defaultNormalTexture());
-            }else{
-                o->normalTexture =TextureMap(scene->textures [material->normalTexture]);
-            }
-
-            //准备颜色贴图
-            if(material ==nullptr ||material->baseColorTexture==0){
-                o->baseColorTexture=TextureMap(Texture::defaultGrayColorTexture());
-            }else{
-                o->baseColorTexture =TextureMap(scene->textures [material->baseColorTexture]);
-            }
-
-            //准备金属粗糙度贴图
-            if(material ==nullptr ||material->metallicRoughnessTexture==0){
-                o->metalRoughnessTexture=TextureMap(Texture::defaultBlackColorTexture());
-            }else{
-                o->metalRoughnessTexture=TextureMap(scene->textures [material->metallicRoughnessTexture]);
-            }
-
-            //准备自发光贴图
-            if(material ==nullptr ||material->emissionTexture==0){
-                o->emissionTexture=TextureMap(Texture::defaultBlackColorTexture());
-            }else{
-                o->emissionTexture=TextureMap(scene->textures [material->emissionTexture]);
-            }
 
 
 
-            float x_min=FLT_MAX,x_max=-FLT_MAX,y_min=FLT_MAX,y_max=-FLT_MAX,z_min=FLT_MAX,z_max=-FLT_MAX;
-            for (int o_i=0; o_i < o->verticesCount; o_i++){
-                if (o->preVertices[o_i].x < x_min){
-                    x_min=o->preVertices[o_i].x;
-                }
-                if(o->preVertices[o_i].x > x_max){
-                    x_max=o->preVertices[o_i].x;
-                }
-                if (o->preVertices[o_i].y < y_min){
-                    y_min=o->preVertices[o_i].y;
-                }
-                if(o->preVertices[o_i].y > y_max){
-                    y_max=o->preVertices[o_i].y;
-                }
-                if (o->preVertices[o_i].z < z_min){
-                    z_min=o->preVertices[o_i].z;
-                }
-                if(o->preVertices[o_i].z > z_max){
-                    z_max=o->preVertices[o_i].z;
-                }
-            }
-            auto x=x_max-x_min;
-            auto y=x_max-y_min;
-            auto z=z_max-z_min;
-            o->size=sqrt(x*x+y*y+z*z);
-            o->centor=Vector3f((x_max+x_min)/2,(y_max+y_min)/2,(z_max+z_min)/2);
-            this->sceneMin.x=fmin(this->sceneMin.x,x_min);
-            this->sceneMin.y=fmin(this->sceneMin.y,y_min);
-            this->sceneMin.z=fmin(this->sceneMin.z,z_min);
-            this->sceneMax.x=fmax(this->sceneMax.x,x_max);
-            this->sceneMax.y=fmax(this->sceneMax.y,y_max);
-            this->sceneMax.z=fmax(this->sceneMax.z,z_max);
-
-            VertexShader::vertexAttributeShading(o->indicesCount,o->indices,o->verticesCount,o->preVertices,o->normal,o->uvTexture,o->attribute);
-        }
-    }
 }
 
 render_core::GraphicsPipeline::~GraphicsPipeline() {

@@ -237,6 +237,7 @@ const byte *GltfFile::getBuffer(unsigned int index, unsigned int *length) {
             return this->uriData[uri.asString()].data;
         }
     }
+    return nullptr;
 }
 
 bool GltfFile::fillScene(render::Scene* sceneResource) {
@@ -495,6 +496,12 @@ const byte *GltfFile::getImage(unsigned int index, std::string &name, unsigned i
         *dataLength=length;
         return data;
     }
+    auto bufferView=image["bufferView"];
+    if(!bufferView.empty()){
+        name="";
+        return this->getBufferView(bufferView.asInt(),dataLength);
+    }
+
     return nullptr;
 
 }
